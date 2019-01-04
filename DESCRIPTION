@@ -1,0 +1,12 @@
+Package: specio
+Title: Read Spectrum Files
+Version: 0.0.1
+Authors@R: 
+    person(given = "Robert",
+           family = "Ashton",
+           role = c("aut", "cre"),
+           email = "r.ashton@imperial.ac.uk")
+Description: TODO.
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
