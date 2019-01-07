@@ -10,6 +10,8 @@ Description: TODO.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
+Imports:
+    stringr
 Suggests: 
     testthat
 RoxygenNote: 6.1.1

@@ -1,20 +1,74 @@
-
-
-#' @title Add two numbers.
+#' Load best fitting HIV incidence and prevalence data from SPT file.
 #'
-#' This is the description section (one paragraph)
+#' Locates SPT file within the PJNZ file and reads out the best fitting
+#' incidence and prevalence data into memory.
 #'
-#' This is the details section (zero or more paragraphs)
+#' Reads best fitting prevalence and incidence and population data for all
+#' regions. The outputs one data frame for each region in the SPT file.
 #'
-#' @param a First number to add
-#' @param b Second number to add
+#' @param pjnz_path Path to the PJNZ file.
 #'
-#' @return The added numbers
+#' @return List of data frames containing the best fit prevalence and incidence
+#' data.
 #' @export
 #'
 #' @examples
-#' add(1, 2)
+#' pjnz_path <- system.file("testdata", "Botswana2018.PJNZ", package="specio")
+#' read_bf_incidence_and_prevalence(pjnz_path)
 #'
-add <- function(a, b) {
-  a + b
+read_bf_incidence_and_prevalence <- function(pjnz_path){
+  spt_filename <- grep("\\.SPT$", utils::unzip(pjnz_path, list=TRUE)$Name,
+                       value=TRUE)
+  if (length(spt_filename) != 1) {
+    stop(sprintf("Only one SPT file must exist at path %s, found %d.",
+         pjnz_path, length(spt_filename)))
+  }
+  con <- unz(pjnz_path, spt_filename)
+  spt <- scan(con, "character", sep="\n")
+  close(con)
+
+  # Data for a particular region starts with "==" delimiter
+  region_row_breaks <- which(spt == "==")
+  # Incidence and prevalence data ends with "=" delimiter
+  incid_prev_row_breaks <- which(spt == "=")
+  no_of_years <- incid_prev_row_breaks[2] - region_row_breaks[1] - 3
+  regions <- stats::na.omit(spt[region_row_breaks+1])
+  # Expect regions to have identifier e.g. Botswana_ 2017_2\Urban:URBAN,NO,50.0
+  regions <- stringr::str_match(regions, "\\\\([\\w\\s]+):")[,2]
+  # National region is not labelled, add manually
+  regions[is.na(regions)] <- "National"
+
+  # Ignore first break as the "National" data is repeated
+  incidence_and_prevalence <- lapply(incid_prev_row_breaks[-1],
+                                     extract_incidence_prevalence,
+                                     spt_data = spt,
+                                     no_of_years = no_of_years)
+
+  names(incidence_and_prevalence) <- regions
+  return(incidence_and_prevalence)
+}
+
+#' Extract incidence and prevalence for single region.
+#'
+#' Gets the incidence, prevalence and population data (if available) for a
+#' single region, e.g. National, Urban or Rural.
+#'
+#' @param break_index The index of the line break in the spt_data where data
+#' about this region ends.
+#' @param spt_data The complete spt data read from a file.
+#' @param no_of_years The number of years in the data set, equivalent to the
+#' number of rows we return.
+#'
+#' @return A data frame, one row for each year showing the HIV incidence,
+#' prevalence and population (if available).
+#'
+#' @keywords internal
+#'
+extract_incidence_prevalence <- function(break_index, spt_data, no_of_years) {
+  dat <- spt_data[(break_index-no_of_years):(break_index-1)]
+  region_data <-
+    data.frame(t(sapply(strsplit(dat, ","), as.numeric)), row.names=1)
+  region_data[,1:2] <- region_data[,1:2]/100
+  names(region_data) <- c("prev", "incid", "pop")[1:ncol(region_data)]
+  return(region_data)
 }

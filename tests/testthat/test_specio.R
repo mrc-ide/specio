@@ -1,5 +1,37 @@
 context("specio")
 
-test_that("add returns as expected", {
-  expect_equal(add(1, 1), 2)
+test_that("Missing SPT data throws an error", {
+  pjnz_path <- system.file("testdata", "Netherlands2017.PJNZ", package="specio")
+  expect_error(specio::read_bf_incidence_and_prevalence(pjnz_path),
+               paste0("Only one SPT file must exist at path ",
+               pjnz_path,
+               ", found 0."))
+})
+
+test_that("Botswana2017 EPP data is read correctly", {
+  pjnz_path <- system.file("testdata", "Botswana2017.PJNZ", package="specio")
+
+  incidence_prevalence_bf <- specio::read_bf_incidence_and_prevalence(pjnz_path)
+  incidence_prevalence_bf_ref <- readRDS(
+    "testdata/Botswana2017_incidence_prevalence_bf_data.rds")
+  expect_equal(incidence_prevalence_bf, incidence_prevalence_bf_ref)
+})
+
+test_that("Botswana2018 EPP data is read correctly", {
+  pjnz_path <- system.file("testdata", "Botswana2018.PJNZ", package="specio")
+
+  incidence_prevalence_bf <- specio::read_bf_incidence_and_prevalence(pjnz_path)
+  incidence_prevalence_bf_ref <- readRDS(
+    "testdata/Botswana2018_incidence_prevalence_bf_data.rds")
+  expect_equal(incidence_prevalence_bf, incidence_prevalence_bf_ref)
+})
+
+test_that("Mozambique_Maputo_Cidade2018 EPP data is read correctly", {
+  pjnz_path <- system.file("testdata", "Mozambique_Maputo_Cidade2018.PJNZ",
+                      package="specio")
+
+  incidence_prevalence_bf <- specio::read_bf_incidence_and_prevalence(pjnz_path)
+  incidence_prevalence_bf_ref <- readRDS(
+    "testdata/Mozambique_Maputo_Cidade2018_incidence_prevalence_bf_data.rds")
+  expect_equal(incidence_prevalence_bf, incidence_prevalence_bf_ref)
 })
