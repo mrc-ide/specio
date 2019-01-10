@@ -14,33 +14,33 @@
 #'
 #' @examples
 #' pjnz_path <- system.file("testdata", "Botswana2018.PJNZ", package="specio")
-#' read_bf_incidence_and_prevalence(pjnz_path)
+#' read_spt(pjnz_path)
 #'
-read_bf_incidence_and_prevalence <- function(pjnz_path){
+read_spt <- function(pjnz_path){
   spt_filename <- get_filename_from_extension("SPT", pjnz_path)
   con <- unz(pjnz_path, spt_filename)
-  spt <- scan(con, "character", sep="\n")
+  spt_file <- scan(con, "character", sep="\n")
   close(con)
 
-  # Data for a particular region starts with "==" delimiter
-  region_row_breaks <- which(spt == "==")
-  # Incidence and prevalence data ends with "=" delimiter
-  incid_prev_row_breaks <- which(spt == "=")
+  ## Data for a particular region starts with "==" delimiter
+  region_row_breaks <- which(spt_file == "==")
+  ## Incidence and prevalence data ends with "=" delimiter
+  incid_prev_row_breaks <- which(spt_file == "=")
   no_of_years <- incid_prev_row_breaks[2] - region_row_breaks[1] - 3
-  regions <- stats::na.omit(spt[region_row_breaks + 1])
-  # Expect regions to have identifier e.g. Botswana_ 2017_2\Urban:URBAN,NO,50.0
+  regions <- stats::na.omit(spt_file[region_row_breaks + 1])
+  ## Expect regions to have identifier e.g. Botswana_ 2017_2\Urban:URBAN,NO,50.0
   regions <- stringr::str_match(regions, "\\\\([\\w\\s]+):")[,2]
-  # National region is not labelled, add manually
+  ## National region is not labelled, add manually
   regions[is.na(regions)] <- "National"
 
-  # Ignore first break as the "National" data is repeated
-  incidence_and_prevalence <- lapply(incid_prev_row_breaks[-1],
+  ## Ignore first break as the "National" data is repeated
+  spt_data <- lapply(incid_prev_row_breaks[-1],
                                      extract_incidence_prevalence,
-                                     spt_data = spt,
+                                     spt_data = spt_file,
                                      no_of_years = no_of_years)
 
-  names(incidence_and_prevalence) <- regions
-  return(incidence_and_prevalence)
+  names(spt_data) <- regions
+  return(spt_data)
 }
 
 #' Read EPP fitting surveillance data
@@ -59,9 +59,9 @@ read_bf_incidence_and_prevalence <- function(pjnz_path){
 #'
 #' @examples
 #' pjnz_path <- system.file("testdata", "Botswana2018.PJNZ", package="specio")
-#' read_epp_prevalence(pjnz_path)
+#' read_epp_data(pjnz_path)
 #'
-read_epp_prevalence <- function(pjnz_path) {
+read_epp_data <- function(pjnz_path) {
 
   properties <- get_eppxml_workset(pjnz_path)
   if(is.null(properties)) {
@@ -73,8 +73,8 @@ read_epp_prevalence <- function(pjnz_path) {
   attr(epp_data, "country_code") <- xml2::xml_integer(
     properties[["countryCode"]])
 
-  # ANC/HSS input mode appears only defined in second set if updated, so
-  # define global version. Defaults to "HSS mode", which is no ANC-RT data.
+  ## ANC/HSS input mode appears only defined in second set if updated, so
+  ## define global version. Defaults to "HSS mode", which is no ANC-RT data.
   input_mode <- "HSS"
 
   projection_sets <- xml2::xml_find_all(
@@ -129,25 +129,32 @@ get_anc_data <- function(projection_set, input_mode) {
     anc$site_names <- get_array_property_data(projection_set, "siteNames")
     anc$used <- get_array_property_data(projection_set, "siteSelected")
 
-    anc$prevalence <- get_array_property_data(projection_set,
-                                              "survData",
-                                              anc$site_names)
-    # TODO Why?
+    anc$prevalence <- get_array_property_data(projection_set, "survData")
+    dimnames(anc$prevalence) <- list(site = anc$site_names,
+                                  year = 1985+0:(ncol(anc$prevalence)-1))
+    anc$prevalence[anc$prevalence == -1] <- NA
+
+    # Stored in Java object as a percent but needed as a probability for EPP
     anc$prevalence <- anc$prevalence / 100
     anc$sample_size <-  get_array_property_data(projection_set,
-                                                "survSampleSizes",
-                                                 anc$site_names)
+                                                "survSampleSizes")
+    dimnames(anc$sample_size) <- list(site = anc$site_names,
+                                     year = 1985+0:(ncol(anc$sample_size)-1))
+    anc$sample_size[anc$sample_size == -1] <- NA
 
-    # ANC-RT site level
+    ## ANC-RT site level
     if(length(projection_set[["PMTCTData"]]) && input_mode == "ANC") {
       anc$rt_prevalence <- get_array_property_data(projection_set,
-                                                   "PMTCTData",
-                                                   anc$site_names)
+                                                   "PMTCTData")
+      dimnames(anc$rt_prevalence) <- list(site = anc$site_names,
+                                        year = 1985+0:(ncol(anc$rt_prevalence)-1))
+      anc$rt_prevalence[anc$rt_prevalence == -1] <- NA
       anc$rt_prevalence <- anc$rt_prevalence / 100
-      anc$rt_sample_size <- get_array_property_data(
-        projection_set,
-        "PMTCTSiteSampleSizes",
-        anc$site_names)
+      anc$rt_sample_size <- get_array_property_data(projection_set,
+                                                    "PMTCTSiteSampleSizes")
+      dimnames(anc$rt_sample_size) <- list(site = anc$site_names,
+                                          year = 1985+0:(ncol(anc$rt_sample_size)-1))
+      anc$rt_sample_size[anc$rt_sample_size == -1] <- NA
     }
 
   }
@@ -211,7 +218,7 @@ get_hh_survey_data <- function(projection_set) {
     hh_survey <- hh_survey[which(hh_survey$prev > 0 | hh_survey$used |
                                     hh_survey$se != 0.01), ]
 
-    # TODO Why?
+    ## TODO Why?
     if (nrow(hh_survey)) {
       hh_survey[hh_survey$incid < 0, c("incid",
                                        "incid_se",
@@ -234,7 +241,7 @@ get_hh_survey_data <- function(projection_set) {
   return(hh_survey)
 }
 
-# Consider refactoring when we have test case which covers this
+## Consider refactoring when we have test case which covers this
 parse_survey <- function(survey) {
   ns <- xml2::xml_children(xml2::xml_child(survey))
   attrs <- lapply(ns, xml2::xml_attrs)
@@ -268,98 +275,6 @@ parse_survey <- function(survey) {
   val[cols]
 }
 
-#' Get data for a property from the xml_nodeset.
-#'
-#' Will get array data from one xml_node from an xml_nodeset. If node
-#' represents a vector then a vector is returned. If node repsents a matrix then
-#' parse data and return matrix.
-#'
-#' @param nodeset The xml nodeset containing the property.
-#' @param property The property to get data for.
-#' @param site_names Optional list of site names to use for matrix row names.
-#'
-#' @return Parsed property data.
-#' @keywords internal
-#'
-get_array_property_data <- function(nodeset, property, site_names = NULL) {
-  property_data <- xml2::xml_find_first(nodeset[[property]], "array")
-  parsed_data <- NA
-  if(xml2::xml_attr(property_data, "class") %in% c("[D", "[I")) {
-    parsed_data <- parse_matrix(property_data)
-    dimnames(parsed_data) <- list(site = site_names,
-                                  year = 1985+0:(ncol(parsed_data)-1))
-    # TODO: Why?
-    parsed_data[parsed_data == -1] <- NA
-  } else {
-    parsed_data <- parse_array(property_data)
-  }
-  return(parsed_data)
-}
-
-
-#' Parse xml node containing array to vector.
-#'
-#' Parses XML representation of java array from EPP .xml file.
-#'
-#' @param xml_node `xml_node` object representing an array.
-#' @return A vector representing the array.
-#'
-#' @keywords internal
-#'
-parse_array <- function(xml_node) {
-  convert_element <- switch(xml2::xml_attr(xml_node, "class"),
-                            int = xml2::xml_integer,
-                            double = xml2::xml_double,
-                            boolean =
-                              function(x) as.logical(xml2::xml_text(x)),
-                            java.lang.String = xml2::xml_text)
-  arr <- convert_element(xml2::xml_children(xml_node))
-  # Array may contain fewer elements than its length property specifies. Ensure
-  # return vector has the correct length. i.e. the length specified by the
-  # property
-  if (length(arr) < as.integer(xml2::xml_attr(xml_node, "length"))) {
-    length(arr) <- as.integer(xml2::xml_attr(xml_node, "length"))
-  }
-  return(arr)
-}
-
-#' Parse xml node representing matrix to an R matrix.
-#'
-#' Parses XML representation of java array of arrays from EPP .xml file.
-#'
-#' @param xml_node `xml_node` object representing a matrix.
-#' @return Matrix
-#'
-#' @keywords internal
-#'
-parse_matrix <- function(xml_node) {
-  if(!xml2::xml_attr(xml_node, "class") %in% c("[D", "[I")) {
-    stop("Can't parse matrix on node not of class '[D' or '[I'.")
-  }
-  rows <- xml2::xml_children(xml_node)
-  idx <- as.integer(xml2::xml_attr(rows, "index")) + 1L
-  parsed_matrix <- sapply(xml2::xml_find_first(rows, "array"), parse_array)
-  t(parsed_matrix)
-}
-
-#' Get EPP workset from xml file.
-#'
-#' Gets all properties of the EPP workset from xml file inside zip at specified
-#' path.
-#'
-#' @param pjnz_path Path to zip containing workset xml.
-#'
-#' @return The workset as a list.
-#' @export
-#'
-get_eppxml_workset <- function(pjnz_path) {
-  xmlfile <- get_filename_from_extension("xml", pjnz_path)
-  con <- unz(pjnz_path, xmlfile)
-  epp_xml <- xml2::read_xml(con)
-  properties <- xml2::xml_children(xml2::xml_children(epp_xml))
-  names(properties) <- xml2::xml_attr(properties, "property")
-  return(properties)
-}
 
 #' Extract incidence and prevalence for single region.
 #'
@@ -384,27 +299,4 @@ extract_incidence_prevalence <- function(break_index, spt_data, no_of_years) {
   region_data[,1:2] <- region_data[,1:2]/100
   names(region_data) <- c("prev", "incid", "pop")[1:ncol(region_data)]
   return(region_data)
-}
-
-#' Get filename from extension.
-#'
-#' Helper method to get the full filename within a zip matching extension. This
-#' expects there to be only one file in the zip with the extension.
-#'
-#' @param file_extension The file extension to look for.
-#' @param path_to_zip The path to the zip file to look in.
-#'
-#' @return The name of the located file.
-#'
-#' @keywords internal
-#'
-get_filename_from_extension <- function(file_extension, path_to_zip) {
-  filename <- grep(paste0("\\.", file_extension, "$"),
-                   utils::unzip(path_to_zip, list=TRUE)$Name,
-                   value=TRUE)
-  if (length(filename) != 1) {
-    stop(sprintf("Only one file of type %s must exist at path %s, found %d.",
-                 file_extension, path_to_zip, length(filename)))
-  }
-  return(filename)
 }
