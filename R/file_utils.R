@@ -39,3 +39,4 @@ get_eppxml_workset <- function(pjnz_path) {
   names(properties) <- xml2::xml_attr(properties, "property")
   return(properties)
 }
+

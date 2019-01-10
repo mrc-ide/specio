@@ -35,7 +35,7 @@ parse_array <- function(xml_node) {
   convert_elem <- switch(a_mode,
                          integer = xml2::xml_integer,
                          numeric = xml2::xml_double,
-                         logical = function(x) as.logical(xml2::xml_text(elem)),
+                         logical = function(x) as.logical(xml2::xml_text(x)),
                          character = xml2::xml_text)
   arr[idx] <- convert_elem(elem)
   return(arr)
@@ -79,26 +79,18 @@ parse_matrix <- function(xml_node) {
   return(parsed_matrix)
 }
 
-#' Get data for a property from the xml_nodeset.
+#' Get data for an array property from the xml_node.
 #'
-#' Will get array data from one xml_node from an xml_nodeset. If node
-#' represents a vector then a vector is returned. If node repsents a matrix then
-#' parse data and return matrix.
+#' Will get array data from one xml_node. If node represents a vector then a
+#' vector is returned. If node repsents a matrix return matrix.
 #'
-#' @param nodeset The xml nodeset containing the property.
-#' @param property The property to get data for.
+#' @param node The xml node.
 #'
 #' @return Parsed property data.
 #' @keywords internal
 #'
-get_array_property_data <- function(nodeset, property) {
-  property_nodes <- nodeset[xml2::xml_attr(nodeset, "property") == property]
-  property_data <- xml2::xml_find_all(property_nodes, "array")
-  if (length(property_data) != 1) {
-    stop(paste0("Can't get property data for property ", property,
-                " from nodeset. Expected only 1 property but found ",
-                length(property_data), "."))
-  }
+get_array_property_data <- function(node) {
+  property_data <- xml2::xml_find_all(node, "array")
   parsed_data <- NA
   if(xml2::xml_attr(property_data, "class") %in% c("[D", "[I")) {
     parsed_data <- parse_matrix(property_data)
@@ -106,4 +98,48 @@ get_array_property_data <- function(nodeset, property) {
     parsed_data <- parse_array(property_data)
   }
   return(parsed_data)
+}
+
+#' Get character value of enum property from the xml_node.
+#'
+#' Get the enum property of the xml node as a character.
+#'
+#' @param node The xml node.
+#'
+#' @return Parsed property data.
+#' @keywords internal
+#'
+get_enum_property <- function(node) {
+  as.character(xml2::xml_text(xml2::xml_find_all(node, ".//string")))
+}
+
+
+#' Get data for a property in a nodeset.
+#'
+#' Locates an xml property wthin the nodeset, parses the value depending on
+#' the type of the property and returns the parsed value.
+#'
+#' @param nodeset The nodeset to get the property from.
+#' @param property The property to get.
+#'
+#' @return Parsed property data.
+#' @keywords internal
+#'
+get_property <- function(nodeset, property) {
+  property_node <- nodeset[xml2::xml_attr(nodeset, "property") == property]
+  if (length(property_node) != 1) {
+    stop(paste0("Can't get property data for property ", property,
+                " from nodeset. Expected only 1 property but found ",
+                length(property_node), "."))
+  }
+  get_property_data <- switch(
+    xml2::xml_name(xml2::xml_child(property_node)),
+    string = function(x) xml2::xml_text(xml2::xml_child(x)),
+    int = function(x) xml2::xml_integer(xml2::xml_child(x)),
+    double = function(x)xml2::xml_double(xml2::xml_child(x)),
+    boolean = function(x) as.logical(xml2::xml_text(xml2::xml_child(x))),
+    array = get_array_property_data,
+    object = get_enum_property
+  )
+  get_property_data(property_node)
 }

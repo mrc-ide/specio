@@ -161,7 +161,7 @@ test_nodeset <- xml2::read_xml('
             <int>7</int>
           </void>
           <void index="2">
-            <int>8</int>
+             <int>8</int>
           </void>
         </array>
       </void>
@@ -180,5 +180,24 @@ test_nodeset <- xml2::read_xml('
       </void>
     </array>
   </void>
+  <void property="testProperty3">
+    <int>72</int>
+  </void>
+  <void property="testProperty4">
+    <double>0.1</double>=
+  </void>
+  <void property="testProperty5">
+    <string>Example</string>
+  </void>
+  <void property="testProperty6">
+    <boolean>true</boolean>
+  </void>
+  <void property="testProperty7">
+    <object class="java.lang.Enum" method="valueOf">
+      <class>epp2011.EPPConstants$LocationType</class>
+      <string>URBAN</string>
+    </object>
+  </void>
 </object>
 ')
+

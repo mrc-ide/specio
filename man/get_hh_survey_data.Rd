@@ -2,7 +2,7 @@
 % Please edit documentation in R/specio.R
 \name{get_hh_survey_data}
 \alias{get_hh_survey_data}
-\title{Extract HH survey data from ProjectionSet.}
+\title{Extract and prepare HH survey data from ProjectionSet.}
 \usage{
 get_hh_survey_data(projection_set)
 }
@@ -11,7 +11,7 @@ get_hh_survey_data(projection_set)
 object.}
 }
 \description{
-Helper function which handles extracting ANC data from the xml_nodeset
-representing ProjectionSet java object.
+Helper function which handles extracting and tidying HH survey data from
+the xml_nodeset representing ProjectionSet java object.
 }
 \keyword{internal}

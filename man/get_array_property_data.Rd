@@ -2,21 +2,18 @@
 % Please edit documentation in R/xml_utils.R
 \name{get_array_property_data}
 \alias{get_array_property_data}
-\title{Get data for a property from the xml_nodeset.}
+\title{Get data for an array property from the xml_node.}
 \usage{
-get_array_property_data(nodeset, property)
+get_array_property_data(node)
 }
 \arguments{
-\item{nodeset}{The xml nodeset containing the property.}
-
-\item{property}{The property to get data for.}
+\item{node}{The xml node.}
 }
 \value{
 Parsed property data.
 }
 \description{
-Will get array data from one xml_node from an xml_nodeset. If node
-represents a vector then a vector is returned. If node repsents a matrix then
-parse data and return matrix.
+Will get array data from one xml_node. If node represents a vector then a
+vector is returned. If node repsents a matrix return matrix.
 }
 \keyword{internal}

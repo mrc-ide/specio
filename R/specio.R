@@ -69,9 +69,8 @@ read_epp_data <- function(pjnz_path) {
   }
 
   epp_data <- list()
-  attr(epp_data, "country") <- xml2::xml_text(workset[["worksetCountry"]])
-  attr(epp_data, "country_code") <- xml2::xml_integer(
-    workset[["countryCode"]])
+  attr(epp_data, "country") <- get_property(workset, "worksetCountry")
+  attr(epp_data, "country_code") <- get_property(workset, "countryCode")
 
   ## ANC/HSS input mode appears only defined in second ProjectionSet if
   ## different from first ProjectionSet, so define global version.
@@ -79,21 +78,20 @@ read_epp_data <- function(pjnz_path) {
   input_mode <- "HSS"
 
   projection_sets <- xml2::xml_find_all(
-    workset, "//object[@class='epp2011.core.sets.ProjectionSet']")
+    workset, ".//object[@class='epp2011.core.sets.ProjectionSet']")
 
   for (projection_set in projection_sets) {
     projset_id <- as.integer(gsub("[^0-9]", "", xml2::xml_attr(projection_set,
                                                                "id")))
     epp_set <- xml2::xml_children(projection_set)
     names(epp_set) <- xml2::xml_attr(epp_set, "property")
-    epp_region <- xml2::xml_text(epp_set[["name"]])
+    epp_region <- get_property(epp_set, "name")
 
     ## Only update input mode if specified in the ProjectionSet, otherwise use
     ## the previous value.
     if(length(epp_set[["dataInputMode"]]) && length(
       xml2::xml_find_first(epp_set[["dataInputMode"]], ".//string"))) {
-      input_mode <- xml2::xml_text(
-        xml2::xml_find_first(epp_set[["dataInputMode"]], ".//string"))
+      input_mode <- get_property(epp_set, "dataInputMode")
     }
 
     anc_data <- get_anc_data(epp_set, input_mode)
@@ -116,6 +114,116 @@ read_epp_data <- function(pjnz_path) {
   return(epp_data)
 }
 
+#' Read EPP subpopulation configuration.
+#'
+#' Reads the subpopulation configuration and population sizes from the EPP .xml
+#' file within a PJNZ.
+#'
+#' EPP projection sets are identified in the .xml file by searching the XML tree
+#' for tag "object", and then selecting objects with "class" attribute equal to
+#' "epp2011.core.sets.ProjectionSet".
+#'
+#' @param pjnz_path file path to Spectrum PJNZ file.
+#'
+#' @export
+read_epp_subpops <- function(pjnz_path) {
+  workset <- get_eppxml_workset(pjnz_path)
+  if(is.null(workset)) {
+    return(NULL)
+  }
+
+  epp_pops <- list()
+  attr(epp_pops, "country") <- get_property(workset, "worksetCountry")
+  attr(epp_pops, "country_code") <- get_property(workset, "countryCode")
+
+  epidemic_type <- tolower(get_property(workset, "epidemicType"))
+  attr(epp_pops, "epidemicType") <- epidemic_type
+
+  start_year <- get_property(workset, "worksetStartYear")
+  end_year <- get_property(workset, "worksetEndYear")
+  pop_base_year <- get_property(workset, "worksetPopBaseYear")
+
+  epp_pops$total <-  data.frame(
+    year      = start_year:end_year,
+    pop15to49 = get_property(workset, "pop15to49"),
+    pop15     = get_property(workset, "pop15"),
+    pop50     = get_property(workset, "pop50"),
+    netmigr   = get_property(workset, "netMigration"))
+
+  epp_pops$subpops <- list()
+
+  projection_sets <- xml2::xml_find_all(
+    workset, ".//object[@class='epp2011.core.sets.ProjectionSet']")
+
+  for(projection_set in projection_sets) {
+    projset_id <- as.integer(gsub("[^0-9]", "",
+                                  xml2::xml_attr(projection_set, "id")))
+    epp_set <- xml2::xml_children(projection_set)
+    names(epp_set) <- xml2::xml_attr(epp_set, "property")
+
+    epp_region <- get_property(epp_set, "name")
+
+    subpop_data <- data.frame(
+      year = start_year:end_year,
+      pop15to49 = get_property(epp_set, "pop15to49"),
+      pop15     = get_property(epp_set, "pop15"),
+      pop50     = get_property(epp_set, "pop50"),
+      netmigr   = get_property(epp_set, "netMigration"))
+    attr(subpop_data, "projset_id") <- projset_id
+    attr(subpop_data, "epidemic.start") <- as.integer(get_property(epp_set,
+                                                                   "priorT0vr"))
+
+    if (epidemic_type == "concentrated") {
+      subpop <- get_property(epp_set, "specSubPop")
+      names(subpop) <- c("low_risk", "msm", "msw", "fsw", "clients",
+                         "idu", "prisoners", "transgender", "anc")
+
+      if (length(epp_set[["percentageMale"]])) {
+        percent_male <- get_property(epp_set, "percentageMale") / 100
+      } else {
+        percent_male <- 0.0
+      }
+
+      turnover <- as.logical(length(epp_set[["turnedOver"]])) &&
+        get_property(epp_set, "turnedOver")
+
+      if(turnover) {
+        duration <- get_property(epp_set, "duration")
+        assign_id <- xml2::xml_attr(
+          xml2::xml_find_first(epp_set[["groupToAssignTo"]], ".//object"), "id")
+        assign_id <- as.integer(gsub("[^0-9]", "", assign_id))
+        assignment_type <- switch(
+          get_property(epp_set, "assignmentMethod"),
+          ASSIGN_REPLACE_PREVALENCE = "replace",
+          ASSIGN_ADD_PREVALENCE = "add")
+      } else {
+        duration <- NA
+        assign_id <- NA
+        assignment_type <- NA
+      }
+
+      attr(subpop_data, "subpop") <-  names(which(subpop))
+      attr(subpop_data, "percent_male") <- percent_male
+      attr(subpop_data, "turnover") <- turnover
+      attr(subpop_data, "duration") <- duration
+      attr(subpop_data, "assign_id") <- assign_id
+      attr(subpop_data, "assignmentType") <- assignment_type
+    }
+
+    epp_pops$subpops[[epp_region]] <- subpop_data
+  }
+
+  projset_ids <- sapply(epp_pops$subpops, attr, "projset_id")
+  assign_ids <- sapply(epp_pops$subpops, attr, "assign_id")
+  assign_name <- names(projset_ids)[match(assign_ids, projset_ids)]
+
+  epp_pops$subpops <- Map("attr<-", epp_pops$subpops, "assign_name", assign_name)
+
+  class(epp_pops) <- "eppsubp"
+
+  return(epp_pops)
+}
+
 #' Extract and prepare ANC related data from ProjectionSet.
 #'
 #' Helper function which handles extracting and tidying ANC data from the
@@ -129,32 +237,29 @@ read_epp_data <- function(pjnz_path) {
 get_anc_data <- function(projection_set, input_mode) {
   anc = list()
   if (exists("siteNames", projection_set)) {
-    anc$site_names <- get_array_property_data(projection_set, "siteNames")
-    anc$used <- get_array_property_data(projection_set, "siteSelected")
+    anc$site_names <- get_property(projection_set, "siteNames")
+    anc$used <- get_property(projection_set, "siteSelected")
 
-    anc$prevalence <- get_array_property_data(projection_set, "survData")
+    anc$prevalence <- get_property(projection_set, "survData")
     anc$prevalence <- tidy_data_for_epp(anc$prevalence,
                                         is_percentage = TRUE,
                                         add_names = TRUE,
                                         site_names = anc$site_names)
 
-    anc$sample_size <-  get_array_property_data(projection_set,
-                                                "survSampleSizes")
+    anc$sample_size <-  get_property(projection_set, "survSampleSizes")
     anc$sample_size <- tidy_data_for_epp(anc$sample_size,
                                            add_names = TRUE,
                                            site_names = anc$site_names)
 
     ## ANC-RT site level
     if(length(projection_set[["PMTCTData"]]) && input_mode == "ANC") {
-      anc$rt_prevalence <- get_array_property_data(projection_set,
-                                                   "PMTCTData")
+      anc$rt_prevalence <- get_property(projection_set, "PMTCTData")
       anc$rt_prevalence <- tidy_data_for_epp(anc$rt_prevalence,
                                              is_percentage = TRUE,
                                              add_names = TRUE,
                                              site_names = anc$site_names)
 
-      anc$rt_sample_size <- get_array_property_data(projection_set,
-                                                    "PMTCTSiteSampleSizes")
+      anc$rt_sample_size <- get_property(projection_set, "PMTCTSiteSampleSizes")
       anc$rt_sample_size <- tidy_data_for_epp(anc$rt_sample_size,
                                               add_names = TRUE,
                                               site_names = anc$site_names)
@@ -174,12 +279,10 @@ get_anc_data <- function(projection_set, input_mode) {
 #' @keywords internal
 get_census_data <- function(projection_set, input_mode) {
   if (length(projection_set[["censusPMTCTSurvData"]]) && input_mode == "ANC") {
-    census_prevalence <- get_array_property_data(projection_set,
-                                                 "censusPMTCTSurvData")
+    census_prevalence <- get_property(projection_set, "censusPMTCTSurvData")
     census_prevalence <- tidy_data_for_epp(census_prevalence, TRUE, TRUE)
 
-    census_sample_size <- get_array_property_data(
-      projection_set, "censusPMTCTSampleSizes")
+    census_sample_size <- get_property(projection_set, "censusPMTCTSampleSizes")
     census_sample_size <- tidy_data_for_epp(census_sample_size)
 
     census_data <- data.frame(year = as.integer(names(census_prevalence)),
@@ -239,22 +342,19 @@ get_hh_survey_data <- function(projection_set) {
   hh_survey <- data.frame()
   if ("surveyYears" %in% names(projection_set)) {
     hh_survey <- data.frame(
-      year = get_array_property_data(projection_set, "surveyYears"),
-      prev = get_array_property_data(projection_set, "surveyHIV") / 100,
-      se = get_array_property_data(projection_set, "surveyStandardError") / 100,
+      year = get_property(projection_set, "surveyYears"),
+      prev = get_property(projection_set, "surveyHIV") / 100,
+      se = get_property(projection_set, "surveyStandardError") / 100,
       n = NA,
-      used = get_array_property_data(projection_set, "surveyIsUsed")
+      used = get_property(projection_set, "surveyIsUsed")
     )
 
     if ("inputInc" %in% names(projection_set)) {
-      hh_survey$incid <- get_array_property_data(projection_set,
-                                                 "inputInc") / 100
-      hh_survey$incid_se <- get_array_property_data(projection_set,
-                                                    "inputIncSE") / 100
-      hh_survey$prev_incid_corr <- get_array_property_data(projection_set,
-                                                  "inputIncPrevCorr")
-      hh_survey$incid_cohort <- get_array_property_data(projection_set,
-                                                        "incIsCohort")
+      hh_survey$incid <- get_property(projection_set, "inputInc") / 100
+      hh_survey$incid_se <- get_property(projection_set, "inputIncSE") / 100
+      hh_survey$prev_incid_corr <- get_property(projection_set,
+                                                "inputIncPrevCorr")
+      hh_survey$incid_cohort <- get_property(projection_set, "incIsCohort")
     } else {
       hh_survey$incid <- -1
       hh_survey$incid_se <- NA
