@@ -63,22 +63,23 @@ read_spt <- function(pjnz_path){
 #'
 read_epp_data <- function(pjnz_path) {
 
-  properties <- get_eppxml_workset(pjnz_path)
-  if(is.null(properties)) {
+  workset <- get_eppxml_workset(pjnz_path)
+  if(is.null(workset)) {
     return(NULL)
   }
 
   epp_data <- list()
-  attr(epp_data, "country") <- xml2::xml_text(properties[["worksetCountry"]])
+  attr(epp_data, "country") <- xml2::xml_text(workset[["worksetCountry"]])
   attr(epp_data, "country_code") <- xml2::xml_integer(
-    properties[["countryCode"]])
+    workset[["countryCode"]])
 
-  ## ANC/HSS input mode appears only defined in second set if updated, so
-  ## define global version. Defaults to "HSS mode", which is no ANC-RT data.
+  ## ANC/HSS input mode appears only defined in second ProjectionSet if
+  ## different from first ProjectionSet, so define global version.
+  ## Spectrum defaults to "HSS mode", which is no ANC-RT data.
   input_mode <- "HSS"
 
   projection_sets <- xml2::xml_find_all(
-    properties, "//object[@class='epp2011.core.sets.ProjectionSet']")
+    workset, "//object[@class='epp2011.core.sets.ProjectionSet']")
 
   for (projection_set in projection_sets) {
     projset_id <- as.integer(gsub("[^0-9]", "", xml2::xml_attr(projection_set,
@@ -87,6 +88,8 @@ read_epp_data <- function(pjnz_path) {
     names(epp_set) <- xml2::xml_attr(epp_set, "property")
     epp_region <- xml2::xml_text(epp_set[["name"]])
 
+    ## Only update input mode if specified in the ProjectionSet, otherwise use
+    ## the previous value.
     if(length(epp_set[["dataInputMode"]]) && length(
       xml2::xml_find_first(epp_set[["dataInputMode"]], ".//string"))) {
       input_mode <- xml2::xml_text(
@@ -94,7 +97,7 @@ read_epp_data <- function(pjnz_path) {
     }
 
     anc_data <- get_anc_data(epp_set, input_mode)
-
+    census_data <- get_census_data(epp_set, input_mode)
     hh_survey_data <- get_hh_survey_data(epp_set)
 
     epp_data[[epp_region]] <- list(
@@ -106,17 +109,17 @@ read_epp_data <- function(pjnz_path) {
       anc.n = anc_data$sample_size,
       ancrtsite.prev = anc_data$rt_prevalence,
       ancrtsite.n = anc_data$rt_sample_size,
-      ancrtcens = anc_data$rt_cens,
+      ancrtcens = census_data,
       hhs = hh_survey_data)
   }
   class(epp_data) <- "eppd"
   return(epp_data)
 }
 
-#' Extract ANC related data from ProjectionSet.
+#' Extract and prepare ANC related data from ProjectionSet.
 #'
-#' Helper function which handles extracting ANC data from the xml_nodeset
-#' representing ProjectionSet java object.
+#' Helper function which handles extracting and tidying ANC data from the
+#' xml_nodeset representing ProjectionSet java object.
 #'
 #' @param projection_set An xml_nodeset representing a ProjectionSet java
 #' object.
@@ -130,59 +133,103 @@ get_anc_data <- function(projection_set, input_mode) {
     anc$used <- get_array_property_data(projection_set, "siteSelected")
 
     anc$prevalence <- get_array_property_data(projection_set, "survData")
-    dimnames(anc$prevalence) <- list(site = anc$site_names,
-                                  year = 1985+0:(ncol(anc$prevalence)-1))
-    anc$prevalence[anc$prevalence == -1] <- NA
+    anc$prevalence <- tidy_data_for_epp(anc$prevalence,
+                                        is_percentage = TRUE,
+                                        add_names = TRUE,
+                                        site_names = anc$site_names)
 
-    # Stored in Java object as a percent but needed as a probability for EPP
-    anc$prevalence <- anc$prevalence / 100
     anc$sample_size <-  get_array_property_data(projection_set,
                                                 "survSampleSizes")
-    dimnames(anc$sample_size) <- list(site = anc$site_names,
-                                     year = 1985+0:(ncol(anc$sample_size)-1))
-    anc$sample_size[anc$sample_size == -1] <- NA
+    anc$sample_size <- tidy_data_for_epp(anc$sample_size,
+                                           add_names = TRUE,
+                                           site_names = anc$site_names)
 
     ## ANC-RT site level
     if(length(projection_set[["PMTCTData"]]) && input_mode == "ANC") {
       anc$rt_prevalence <- get_array_property_data(projection_set,
                                                    "PMTCTData")
-      dimnames(anc$rt_prevalence) <- list(site = anc$site_names,
-                                        year = 1985+0:(ncol(anc$rt_prevalence)-1))
-      anc$rt_prevalence[anc$rt_prevalence == -1] <- NA
-      anc$rt_prevalence <- anc$rt_prevalence / 100
+      anc$rt_prevalence <- tidy_data_for_epp(anc$rt_prevalence,
+                                             is_percentage = TRUE,
+                                             add_names = TRUE,
+                                             site_names = anc$site_names)
+
       anc$rt_sample_size <- get_array_property_data(projection_set,
                                                     "PMTCTSiteSampleSizes")
-      dimnames(anc$rt_sample_size) <- list(site = anc$site_names,
-                                          year = 1985+0:(ncol(anc$rt_sample_size)-1))
-      anc$rt_sample_size[anc$rt_sample_size == -1] <- NA
+      anc$rt_sample_size <- tidy_data_for_epp(anc$rt_sample_size,
+                                              add_names = TRUE,
+                                              site_names = anc$site_names)
     }
-
-  }
-
-  if (length(projection_set[["censusPMTCTSurvData"]]) && input_mode == "ANC") {
-    census_prevalence <- get_array_property_data(projection_set,
-                                                 "censusPMTCTSurvData")
-    names(census_prevalence) <- 1985+0:(length(census_prevalence)-1)
-    census_prevalence[census_prevalence == -1] <- NA
-    census_prevalence <- census_prevalence / 100
-
-    census_sample_size <- get_array_property_data(
-      projection_set, "censusPMTCTSampleSizes")
-    census_sample_size[census_sample_size == -1] <- NA
-
-    anc$rt_cens <- data.frame(year = as.integer(names(census_prevalence)),
-                              prev = census_prevalence,
-                              n = census_sample_size)
-    anc$rt_cens <- anc$rt_cens[which(
-      !is.na(anc$rt_cens$prev) | !is.na(anc$rt_cens$n)), ]
   }
   return(anc)
 }
 
-#' Extract HH survey data from ProjectionSet.
+#' Extract and prepare census data from ProjectionSet.
 #'
-#' Helper function which handles extracting ANC data from the xml_nodeset
-#' representing ProjectionSet java object.
+#' Helper function which handles extracting and tidying census data from the
+#' xml_nodeset representing ProjectionSet java object.
+#'
+#' @param projection_set An xml_nodeset representing a ProjectionSet java
+#' object.
+#'
+#' @keywords internal
+get_census_data <- function(projection_set, input_mode) {
+  if (length(projection_set[["censusPMTCTSurvData"]]) && input_mode == "ANC") {
+    census_prevalence <- get_array_property_data(projection_set,
+                                                 "censusPMTCTSurvData")
+    census_prevalence <- tidy_data_for_epp(census_prevalence, TRUE, TRUE)
+
+    census_sample_size <- get_array_property_data(
+      projection_set, "censusPMTCTSampleSizes")
+    census_sample_size <- tidy_data_for_epp(census_sample_size)
+
+    census_data <- data.frame(year = as.integer(names(census_prevalence)),
+                              prev = census_prevalence,
+                              n = census_sample_size)
+    census_data <- census_data[which(
+      !is.na(census_data$prev) | !is.na(census_data$n)), ]
+  }
+}
+
+#' Tidy data for EPP.
+#'
+#' Helper to tidy data and add labels for use in EPP.
+#'
+#' This will convert any '-1' in the data to an NA as the Java representation
+#' of the data uses -1 to indicate no data.
+#' If is_percentage is true it will divide the data by 100 as Java
+#' representation of data is in percentage but EPP needs it as a probability.
+#' If add_names is true it will add labels to the matrix or vector. If a vector
+#' then it will use years for the names. If a matrix then it will add year
+#' labels to the columns and site labels specified by site_names to the rows.
+#'
+#' @param dat Data to be tidied.
+#' @param is_percentage True if data represents a percentage.
+#' @param add_names True if names should be added to the data.
+#' @param site_names List of site names to be used for the data.
+#'
+#' @return The tidied and labelled data.
+#'
+#' @keywords internal
+tidy_data_for_epp <- function(dat, is_percentage = FALSE, add_names = FALSE,
+                              site_names = NA) {
+  dat[dat == -1] <- NA
+  if (is_percentage & is.numeric(dat)) {
+    dat <- dat/100
+  }
+  if (add_names) {
+    if (length(site_names) & is.matrix(dat)) {
+      dimnames(dat) <- list(site = site_names, year = 1985+0:(ncol(dat)-1))
+    } else if (is.vector(dat)) {
+      names(dat) <- 1985+0:(length(dat)-1)
+    }
+  }
+  return(dat)
+}
+
+#' Extract and prepare HH survey data from ProjectionSet.
+#'
+#' Helper function which handles extracting and tidying HH survey data from
+#' the xml_nodeset representing ProjectionSet java object.
 #'
 #' @param projection_set An xml_nodeset representing a ProjectionSet java
 #' object.
@@ -242,6 +289,7 @@ get_hh_survey_data <- function(projection_set) {
 }
 
 ## Consider refactoring when we have test case which covers this
+## Used for Spectrum EPP data structure for HH survey data impl in 2019 version
 parse_survey <- function(survey) {
   ns <- xml2::xml_children(xml2::xml_child(survey))
   attrs <- lapply(ns, xml2::xml_attrs)
