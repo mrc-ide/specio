@@ -132,14 +132,73 @@ get_property <- function(nodeset, property) {
                 " from nodeset. Expected only 1 property but found ",
                 length(property_node), "."))
   }
-  get_property_data <- switch(
-    xml2::xml_name(xml2::xml_child(property_node)),
-    string = function(x) xml2::xml_text(xml2::xml_child(x)),
-    int = function(x) xml2::xml_integer(xml2::xml_child(x)),
-    double = function(x)xml2::xml_double(xml2::xml_child(x)),
-    boolean = function(x) as.logical(xml2::xml_text(xml2::xml_child(x))),
+  conversion_function <- get_conversion_function(property_node)
+  conversion_function(property_node)
+}
+
+#' Get the relevant conversion function for an xml node.
+#'
+#' Looks at the children of the node to determine the type of data contained in
+#' the node. If the node represents an array then this will return all of the
+#' array data. If the children contain single property data then it will return
+#' the function to convert the data at the specified search location.
+#'
+#' @param node The nodeset to get the property from.
+#' @param search Passed to xml_child, either the child number to convert, or
+#' name of the child node to convert. If multiple with the same name exist, the
+#' first will be returned. Defaults to first.
+#'
+#' @return Conversion function for the node type.
+#' @keywords internal
+#'
+get_conversion_function <- function(node, search = 1) {
+  switch(xml2::xml_name(xml2::xml_child(node, search)),
+    string = function(x) { xml2::xml_text(xml2::xml_child(x, search)) },
+    int = function(x) { xml2::xml_integer(xml2::xml_child(x, search)) },
+    double = function(x) { xml2::xml_double(xml2::xml_child(x, search)) },
+    boolean = function(x) {
+      as.logical(xml2::xml_text(xml2::xml_child(x, search)))
+    },
     array = get_array_property_data,
     object = get_enum_property
   )
-  get_property_data(property_node)
+}
+
+
+#' Get field data from parent node.
+#'
+#' Get all key value pair field data containing in within the node.
+#'
+#' @param node The node containing field data.
+#'
+#' @keywords internal
+#'
+get_fields <- function(node) {
+  field_nodes <- xml2::xml_find_all(node, './/void[@method="getField"]')
+  sapply(field_nodes, get_field_data)
+}
+
+#' Get field data from xml node representing serialised field.
+#'
+#' Function relies on knowing the structure in which fields are persisted in
+#' the xml. e.g.
+#'
+#' <void class=".." method="getField">
+#'   <string>fieldName</string>
+#'   <void method="set">
+#'     <object idref="../>
+#'     <double>fieldValue</double>
+#'   </void>
+#' </void>
+#'
+#' @param field_node Node representing a serialised field.
+#'
+#' @keywords internal
+#'
+get_field_data <- function(field_node) {
+  field_title_converter <- get_conversion_function(field_node)
+  value_node <- xml2::xml_child(field_node, 2)
+  field_value_converter <- get_conversion_function(value_node, 2)
+  stats::setNames(field_value_converter(value_node),
+                  field_title_converter(field_node))
 }

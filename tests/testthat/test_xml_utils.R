@@ -74,3 +74,11 @@ test_that("get property works as expected", {
   property7 <- get_property(xml_nodeset, "testProperty7")
   expect_equal(property7, "URBAN")
 })
+
+test_that("get field data works as expected", {
+  field_node <- xml2::xml_children(test_field_node)
+  field_data <- get_fields(field_node)
+  expect_equal(field_data, stats::setNames(
+    c("2004 BAIS", 2004, 24.68, 0.74),
+    c("name", "year", "surveyHIV", "surveyStandardError")))
+})

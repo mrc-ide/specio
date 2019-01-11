@@ -201,3 +201,40 @@ test_nodeset <- xml2::read_xml('
 </object>
 ')
 
+test_field_node <- xml2::read_xml('
+<void method="add">
+  <object class="epp2011.core.sets.SurveyData" id="SurveyData0">
+    <void class="epp2011.core.sets.SurveyData" method="getField">
+      <string>name</string>
+      <void method="set">
+        <object idref="SurveyData0"/>
+        <string>2004 BAIS</string>
+      </void>
+    </void>
+    <void class="epp2011.core.sets.SurveyData" method="getField">
+      <string>year</string>
+      <void method="set">
+        <object idref="SurveyData0"/>
+        <int>2004</int>
+      </void>
+    </void>
+    <void id="SurveyData$AggregateData0" property="aggregateData">
+      <void class="epp2011.core.sets.SurveyData" method="getField">
+        <string>surveyHIV</string>
+        <void method="set">
+          <object idref="SurveyData$AggregateData0"/>
+          <double>24.68</double>
+        </void>
+      </void>
+      <void class="epp2011.core.sets.SurveyData" method="getField">
+        <string>surveyStandardError</string>
+        <void method="set">
+          <object idref="SurveyData$AggregateData0"/>
+          <double>0.74</double>
+        </void>
+      </void>
+    </void>
+  </object>
+</void>
+')
+

@@ -129,7 +129,7 @@ read_epp_subpops <- function(pjnz_path) {
       get_property(region_properties, "priorT0vr"))
 
     if (epidemic_type == "concentrated") {
-      concentrated_data <- get_concetrated_epidemic_data(region_properties)
+      concentrated_data <- get_concentrated_epidemic_data(region_properties)
       attr(subpop_data, "subpop") <-  names(which(concentrated_data$subpop))
       attr(subpop_data, "percent_male") <- concentrated_data$percent_male
       attr(subpop_data, "turnover") <- concentrated_data$turnover
@@ -161,7 +161,8 @@ read_epp_subpops <- function(pjnz_path) {
 #' @return List containing concentrated epidemic data.
 #'
 #' @keywords internal
-get_concetrated_epidemic_data <- function(epp_set) {
+get_concentrated_epidemic_data <- function(epp_set) {
+  epidemic_data <- list()
   epidemic_data$subpop <- get_property(epp_set, "specSubPop")
   names(epidemic_data$subpop) <- c("low_risk", "msm", "msw", "fsw", "clients",
                      "idu", "prisoners", "transgender", "anc")
@@ -179,14 +180,15 @@ get_concetrated_epidemic_data <- function(epp_set) {
     epidemic_data$duration <- get_property(epp_set, "duration")
     epidemic_data$assign_id <- xml2::xml_attr(
       xml2::xml_find_first(epp_set[["groupToAssignTo"]], ".//object"), "id")
-    epidemic_data$assign_id <- as.integer(gsub("[^0-9]", "", assign_id))
+    epidemic_data$assign_id <- as.integer(gsub("[^0-9]", "",
+                                               epidemic_data$assign_id))
     epidemic_data$assignment_type <- switch(
       get_property(epp_set, "assignmentMethod"),
       ASSIGN_REPLACE_PREVALENCE = "replace",
       ASSIGN_ADD_PREVALENCE = "add")
   } else {
     epidemic_data$duration <- NA
-    turnover_data$assign_id <- NA
+    epidemic_data$assign_id <- NA
     epidemic_data$assignment_type <- NA
   }
   return(epidemic_data)
@@ -342,10 +344,13 @@ get_hh_survey_data <- function(projection_set) {
     }
 
   } else {
+    ## HH survey data stored in new structure for 2019, read data from updated
+    ## structure.
     surveys <- xml2::xml_children(xml2::xml_children(
       projection_set[["surveyData"]]))
     hh_survey <- lapply(surveys, parse_survey)
-    hh_survey <- as.data.frame(do.call(rbind, hh_survey))
+    hh_survey <- as.data.frame(do.call(rbind, hh_survey),
+                               stringsAsFactors = FALSE)
     hh_survey <- as.data.frame(lapply(hh_survey, utils::type.convert))
 
     hh_survey$prev <- hh_survey$prev / 100
@@ -359,35 +364,20 @@ get_hh_survey_data <- function(projection_set) {
 ## Consider refactoring when we have test case which covers this
 ## Used for Spectrum EPP data structure for HH survey data impl in 2019 version
 parse_survey <- function(survey) {
-  ns <- xml2::xml_children(xml2::xml_child(survey))
-  attrs <- lapply(ns, xml2::xml_attrs)
-
-  val <- lapply(
-   lapply(ns[sapply(attrs,  "%in%", x = "getField")], xml2::xml_children),
-   xml2::xml_text)
-
-  v2 <- lapply(ns[!sapply(attrs,  "%in%", x = "getField")], xml2::xml_children)
-  v2 <- lapply(v2, lapply, xml2::xml_children)
-  v2 <- lapply(v2, lapply, xml2::xml_text)
-
-  val <- c(val, unlist(v2, FALSE))
-  val <- stats::setNames(sapply(val, "[", 2), sapply(val, "[", 1))
-
-  cols <- c("name" = "name",
-            "year" = "year",
-            "used",
-            "n",
+  fields <- get_fields(survey)
+  cols <- c("year" = "year",
             "surveyHIV" = "prev",
             "surveyStandardError" = "se",
+            "n",
+            "used",
             "incidence" = "incid",
             "standardError" = "incid_se",
             "prev_incid_corr",
-            "incidence_cohort",
-            "usingIncidenceData" = "incid_used")
+            "incidence_cohort" = "incid_cohort")
 
-  names(val) <- cols[names(val)]
-  val[setdiff(cols, names(val))] <- NA
-  val["used"] <- TRUE
-  val[cols]
+  names(fields) <- cols[names(fields)]
+  fields[setdiff(cols, names(fields))] <- NA
+  fields["used"] <- TRUE
+  fields[cols]
 }
 
