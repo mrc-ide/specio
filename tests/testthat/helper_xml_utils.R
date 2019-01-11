@@ -184,7 +184,7 @@ test_nodeset <- xml2::read_xml('
     <int>72</int>
   </void>
   <void property="testProperty4">
-    <double>0.1</double>=
+    <double>0.1</double>
   </void>
   <void property="testProperty5">
     <string>Example</string>

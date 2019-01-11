@@ -1,48 +1,3 @@
-#' Load best fitting HIV incidence and prevalence data from SPT file.
-#'
-#' Locates SPT file within the PJNZ file and reads out the best fitting
-#' incidence and prevalence data into memory.
-#'
-#' Reads best fitting prevalence and incidence and population data for all
-#' regions. The outputs one data frame for each region in the SPT file.
-#'
-#' @param pjnz_path Path to the PJNZ file.
-#'
-#' @return List of data frames containing the best fit prevalence and incidence
-#' data.
-#' @export
-#'
-#' @examples
-#' pjnz_path <- system.file("testdata", "Botswana2018.PJNZ", package="specio")
-#' read_spt(pjnz_path)
-#'
-read_spt <- function(pjnz_path){
-  spt_filename <- get_filename_from_extension("SPT", pjnz_path)
-  con <- unz(pjnz_path, spt_filename)
-  spt_file <- scan(con, "character", sep="\n")
-  close(con)
-
-  ## Data for a particular region starts with "==" delimiter
-  region_row_breaks <- which(spt_file == "==")
-  ## Incidence and prevalence data ends with "=" delimiter
-  incid_prev_row_breaks <- which(spt_file == "=")
-  no_of_years <- incid_prev_row_breaks[2] - region_row_breaks[1] - 3
-  regions <- stats::na.omit(spt_file[region_row_breaks + 1])
-  ## Expect regions to have identifier e.g. Botswana_ 2017_2\Urban:URBAN,NO,50.0
-  regions <- stringr::str_match(regions, "\\\\([\\w\\s]+):")[,2]
-  ## National region is not labelled, add manually
-  regions[is.na(regions)] <- "National"
-
-  ## Ignore first break as the "National" data is repeated
-  spt_data <- lapply(incid_prev_row_breaks[-1],
-                                     extract_incidence_prevalence,
-                                     spt_data = spt_file,
-                                     no_of_years = no_of_years)
-
-  names(spt_data) <- regions
-  return(spt_data)
-}
-
 #' Read EPP fitting surveillance data
 #'
 #' Reads the HIV prevalence from sentinel surveillance and household
@@ -77,26 +32,26 @@ read_epp_data <- function(pjnz_path) {
   ## Spectrum defaults to "HSS mode", which is no ANC-RT data.
   input_mode <- "HSS"
 
-  projection_sets <- xml2::xml_find_all(
+  region_datasets <- xml2::xml_find_all(
     workset, ".//object[@class='epp2011.core.sets.ProjectionSet']")
 
-  for (projection_set in projection_sets) {
-    projset_id <- as.integer(gsub("[^0-9]", "", xml2::xml_attr(projection_set,
+  for (region_data in region_datasets) {
+    projset_id <- as.integer(gsub("[^0-9]", "", xml2::xml_attr(region_data,
                                                                "id")))
-    epp_set <- xml2::xml_children(projection_set)
-    names(epp_set) <- xml2::xml_attr(epp_set, "property")
-    epp_region <- get_property(epp_set, "name")
+    region_properties <- xml2::xml_children(region_data)
+    names(region_properties) <- xml2::xml_attr(region_properties, "property")
+    epp_region <- get_property(region_properties, "name")
 
     ## Only update input mode if specified in the ProjectionSet, otherwise use
     ## the previous value.
-    if(length(epp_set[["dataInputMode"]]) && length(
-      xml2::xml_find_first(epp_set[["dataInputMode"]], ".//string"))) {
-      input_mode <- get_property(epp_set, "dataInputMode")
+    if(length(region_properties[["dataInputMode"]]) && length(
+      xml2::xml_find_first(region_properties[["dataInputMode"]], ".//string"))) {
+      input_mode <- get_property(region_properties, "dataInputMode")
     }
 
-    anc_data <- get_anc_data(epp_set, input_mode)
-    census_data <- get_census_data(epp_set, input_mode)
-    hh_survey_data <- get_hh_survey_data(epp_set)
+    anc_data <- get_anc_data(region_properties, input_mode)
+    census_data <- get_census_data(region_properties, input_mode)
+    hh_survey_data <- get_hh_survey_data(region_properties)
 
     epp_data[[epp_region]] <- list(
       country = attr(epp_data, "country"),
@@ -152,62 +107,35 @@ read_epp_subpops <- function(pjnz_path) {
 
   epp_pops$subpops <- list()
 
-  projection_sets <- xml2::xml_find_all(
+  region_datasets <- xml2::xml_find_all(
     workset, ".//object[@class='epp2011.core.sets.ProjectionSet']")
 
-  for(projection_set in projection_sets) {
+  for(region_data in region_datasets) {
     projset_id <- as.integer(gsub("[^0-9]", "",
-                                  xml2::xml_attr(projection_set, "id")))
-    epp_set <- xml2::xml_children(projection_set)
-    names(epp_set) <- xml2::xml_attr(epp_set, "property")
+                                  xml2::xml_attr(region_data, "id")))
+    region_properties <- xml2::xml_children(region_data)
+    names(region_properties) <- xml2::xml_attr(region_properties, "property")
 
-    epp_region <- get_property(epp_set, "name")
+    epp_region <- get_property(region_properties, "name")
 
     subpop_data <- data.frame(
       year = start_year:end_year,
-      pop15to49 = get_property(epp_set, "pop15to49"),
-      pop15     = get_property(epp_set, "pop15"),
-      pop50     = get_property(epp_set, "pop50"),
-      netmigr   = get_property(epp_set, "netMigration"))
+      pop15to49 = get_property(region_properties, "pop15to49"),
+      pop15     = get_property(region_properties, "pop15"),
+      pop50     = get_property(region_properties, "pop50"),
+      netmigr   = get_property(region_properties, "netMigration"))
     attr(subpop_data, "projset_id") <- projset_id
-    attr(subpop_data, "epidemic.start") <- as.integer(get_property(epp_set,
-                                                                   "priorT0vr"))
+    attr(subpop_data, "epidemic.start") <- as.integer(
+      get_property(region_properties, "priorT0vr"))
 
     if (epidemic_type == "concentrated") {
-      subpop <- get_property(epp_set, "specSubPop")
-      names(subpop) <- c("low_risk", "msm", "msw", "fsw", "clients",
-                         "idu", "prisoners", "transgender", "anc")
-
-      if (length(epp_set[["percentageMale"]])) {
-        percent_male <- get_property(epp_set, "percentageMale") / 100
-      } else {
-        percent_male <- 0.0
-      }
-
-      turnover <- as.logical(length(epp_set[["turnedOver"]])) &&
-        get_property(epp_set, "turnedOver")
-
-      if(turnover) {
-        duration <- get_property(epp_set, "duration")
-        assign_id <- xml2::xml_attr(
-          xml2::xml_find_first(epp_set[["groupToAssignTo"]], ".//object"), "id")
-        assign_id <- as.integer(gsub("[^0-9]", "", assign_id))
-        assignment_type <- switch(
-          get_property(epp_set, "assignmentMethod"),
-          ASSIGN_REPLACE_PREVALENCE = "replace",
-          ASSIGN_ADD_PREVALENCE = "add")
-      } else {
-        duration <- NA
-        assign_id <- NA
-        assignment_type <- NA
-      }
-
-      attr(subpop_data, "subpop") <-  names(which(subpop))
-      attr(subpop_data, "percent_male") <- percent_male
-      attr(subpop_data, "turnover") <- turnover
-      attr(subpop_data, "duration") <- duration
-      attr(subpop_data, "assign_id") <- assign_id
-      attr(subpop_data, "assignmentType") <- assignment_type
+      concentrated_data <- get_concetrated_epidemic_data(region_properties)
+      attr(subpop_data, "subpop") <-  names(which(concentrated_data$subpop))
+      attr(subpop_data, "percent_male") <- concentrated_data$percent_male
+      attr(subpop_data, "turnover") <- concentrated_data$turnover
+      attr(subpop_data, "duration") <- concentrated_data$duration
+      attr(subpop_data, "assign_id") <- concentrated_data$assign_id
+      attr(subpop_data, "assignmentType") <- concentrated_data$assignment_type
     }
 
     epp_pops$subpops[[epp_region]] <- subpop_data
@@ -222,6 +150,46 @@ read_epp_subpops <- function(pjnz_path) {
   class(epp_pops) <- "eppsubp"
 
   return(epp_pops)
+}
+
+#' Get concentrated epidemic data from EPP data set.
+#'
+#' Gets all data related to a concentrated epidemic from EPP nodeset.
+#'
+#' @param epp_set xmlnodeset containing concetrated epidemic data.
+#'
+#' @return List containing concentrated epidemic data.
+#'
+#' @keywords internal
+get_concetrated_epidemic_data <- function(epp_set) {
+  epidemic_data$subpop <- get_property(epp_set, "specSubPop")
+  names(epidemic_data$subpop) <- c("low_risk", "msm", "msw", "fsw", "clients",
+                     "idu", "prisoners", "transgender", "anc")
+
+  if (length(epp_set[["percentageMale"]])) {
+    epidemic_data$percent_male <- get_property(epp_set, "percentageMale") / 100
+  } else {
+    epidemic_data$percent_male <- 0.0
+  }
+
+  epidemic_data$turnover <- as.logical(length(epp_set[["turnedOver"]])) &&
+    get_property(epp_set, "turnedOver")
+
+  if(epidemic_data$turnover) {
+    epidemic_data$duration <- get_property(epp_set, "duration")
+    epidemic_data$assign_id <- xml2::xml_attr(
+      xml2::xml_find_first(epp_set[["groupToAssignTo"]], ".//object"), "id")
+    epidemic_data$assign_id <- as.integer(gsub("[^0-9]", "", assign_id))
+    epidemic_data$assignment_type <- switch(
+      get_property(epp_set, "assignmentMethod"),
+      ASSIGN_REPLACE_PREVALENCE = "replace",
+      ASSIGN_ADD_PREVALENCE = "add")
+  } else {
+    epidemic_data$duration <- NA
+    turnover_data$assign_id <- NA
+    epidemic_data$assignment_type <- NA
+  }
+  return(epidemic_data)
 }
 
 #' Extract and prepare ANC related data from ProjectionSet.
@@ -423,28 +391,3 @@ parse_survey <- function(survey) {
   val[cols]
 }
 
-
-#' Extract incidence and prevalence for single region.
-#'
-#' Gets the incidence, prevalence and population data (if available) for a
-#' single region, e.g. National, Urban or Rural.
-#'
-#' @param break_index The index of the line break in the spt_data where data
-#' about this region ends.
-#' @param spt_data The complete spt data read from a file.
-#' @param no_of_years The number of years in the data set, equivalent to the
-#' number of rows we return.
-#'
-#' @return A data frame, one row for each year showing the HIV incidence,
-#' prevalence and population (if available).
-#'
-#' @keywords internal
-#'
-extract_incidence_prevalence <- function(break_index, spt_data, no_of_years) {
-  dat <- spt_data[(break_index-no_of_years):(break_index-1)]
-  region_data <-
-    data.frame(t(sapply(strsplit(dat, ","), as.numeric)), row.names=1)
-  region_data[,1:2] <- region_data[,1:2]/100
-  names(region_data) <- c("prev", "incid", "pop")[1:ncol(region_data)]
-  return(region_data)
-}
