@@ -19,19 +19,23 @@
 read_spt <- function(pjnz_path){
   spt_filename <- get_filename_from_extension("SPT", pjnz_path)
   con <- unz(pjnz_path, spt_filename)
-  spt_file <- scan(con, "character", sep="\n")
-  close(con)
+  on.exit(close(con))
+  spt_file <- readLines(con)
 
   ## Data for a particular region starts with "==" delimiter
   region_row_breaks <- which(spt_file == "==")
   ## Incidence and prevalence data ends with "=" delimiter
   incid_prev_row_breaks <- which(spt_file == "=")
   no_of_years <- incid_prev_row_breaks[2] - region_row_breaks[1] - 3
-  regions <- stats::na.omit(spt_file[region_row_breaks + 1])
+  regions_str <- stats::na.omit(spt_file[region_row_breaks + 1])
+
   ## Expect regions to have identifier e.g. Botswana_ 2017_2\Urban:URBAN,NO,50.0
-  regions <- stringr::str_match(regions, "\\\\([\\w\\s]+):")[,2]
   ## National region is not labelled, add manually
-  regions[is.na(regions)] <- "National"
+  regions <- rep("National", length(regions_str))
+  re <- ".+\\\\([A-Za-z ]+):.+"
+  i <- grepl(re, regions_str)
+  regions[i] <- sub(re, "\\1", regions_str[i])
+
 
   ## Ignore first break as the "National" data is repeated
   spt_data <- lapply(incid_prev_row_breaks[-1],
@@ -60,10 +64,10 @@ read_spt <- function(pjnz_path){
 #' @keywords internal
 #'
 extract_incidence_prevalence <- function(break_index, spt_data, no_of_years) {
-  dat <- spt_data[(break_index-no_of_years):(break_index-1)]
-  region_data <-
-    data.frame(t(sapply(strsplit(dat, ","), as.numeric)), row.names=1)
+  dat <- spt_data[seq(break_index-no_of_years, break_index-1)]
+  region_data <- read.table(text = dat, sep = ",", row.names = 1)
   region_data[,1:2] <- region_data[,1:2]/100
-  names(region_data) <- c("prev", "incid", "pop")[1:ncol(region_data)]
+  names(region_data) <- c("prev", "incid", "pop")[seq_along(region_data)]
   return(region_data)
 }
+
