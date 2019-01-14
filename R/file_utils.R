@@ -33,10 +33,10 @@ get_filename_from_extension <- function(file_extension, path_to_zip) {
 get_eppxml_workset <- function(pjnz_path) {
   xmlfile <- get_filename_from_extension("xml", pjnz_path)
   con <- unz(pjnz_path, xmlfile)
-#  on.exit(close(con))
   epp_xml <- xml2::read_xml(con)
   properties <- xml2::xml_children(xml2::xml_children(epp_xml))
   names(properties) <- xml2::xml_attr(properties, "property")
+  stopifnot(length(properities) > 0)
   return(properties)
 }
 

@@ -14,7 +14,6 @@ test_that("filename can be read from zip", {
 
   file_name <- get_filename_from_extension("ep4", zip_path)
   expect_equal(file_name, "Botswana_29_05_2017 updated BF.ep4")
-
 })
 
 test_that("xml workset can be read from file", {
