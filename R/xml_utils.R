@@ -38,6 +38,7 @@ parse_array <- function(xml_node) {
                          logical = function(x) as.logical(xml2::xml_text(x)),
                          character = xml2::xml_text)
   arr[idx] <- convert_elem(elem)
+
   return(arr)
 }
 
@@ -65,7 +66,7 @@ parse_matrix <- function(xml_node) {
   idx <- as.integer(xml2::xml_attr(rows, "index")) + 1L ## Java is 0-based
   parsed_rows <- lapply(xml2::xml_find_first(rows, "array"), parse_array)
   column_length <- length(parsed_rows[[1]])
-  if(!all(sapply(parsed_rows, length) == column_length)) {
+  if(!all(lengths(parsed_rows) == column_length)) {
     stop(paste0("Not all rows are the same length, can't parse matrix. This ",
                 "might be a ragged array."))
   }
@@ -73,10 +74,10 @@ parse_matrix <- function(xml_node) {
   ## Put rows at correct index in returned matrix
   no_of_rows <- as.integer(xml2::xml_attr(xml_node, "length"))
   parsed_matrix <- matrix(nrow = no_of_rows, ncol = column_length)
-  for (i in 1:length(parsed_rows)) {
+  for (i in seq_along(parsed_rows)) {
     parsed_matrix[idx[i],] <- parsed_rows[[i]]
   }
-  return(parsed_matrix)
+  parsed_matrix
 }
 
 #' Get data for an array property from the xml_node.
@@ -91,7 +92,6 @@ parse_matrix <- function(xml_node) {
 #'
 get_array_property_data <- function(node) {
   property_data <- xml2::xml_find_all(node, "array")
-  parsed_data <- NA
   if(xml2::xml_attr(property_data, "class") %in% c("[D", "[I")) {
     parsed_data <- parse_matrix(property_data)
   } else {
@@ -153,14 +153,15 @@ get_property <- function(nodeset, property) {
 #'
 get_conversion_function <- function(node, search = 1) {
   switch(xml2::xml_name(xml2::xml_child(node, search)),
-    string = function(x) { xml2::xml_text(xml2::xml_child(x, search)) },
+    string = function(x) xml2::xml_text(xml2::xml_child(x, search)),
     int = function(x) { xml2::xml_integer(xml2::xml_child(x, search)) },
     double = function(x) { xml2::xml_double(xml2::xml_child(x, search)) },
     boolean = function(x) {
       as.logical(xml2::xml_text(xml2::xml_child(x, search)))
     },
     array = get_array_property_data,
-    object = get_enum_property
+    object = get_enum_property,
+    stop("can't work out how to convert this")
   )
 }
 
@@ -175,7 +176,7 @@ get_conversion_function <- function(node, search = 1) {
 #'
 get_fields <- function(node) {
   field_nodes <- xml2::xml_find_all(node, './/void[@method="getField"]')
-  sapply(field_nodes, get_field_data)
+  lapply(field_nodes, get_field_data)
 }
 
 #' Get field data from xml node representing serialised field.

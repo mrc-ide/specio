@@ -1,0 +1,30 @@
+<void property="testProperty">
+  <array class="[D" length="3">
+    <void index="0">
+      <array class="int" length="3">
+        <void index="0">
+          <int>6</int>
+        </void>
+        <void index="1">
+          <int>7</int>
+        </void>
+        <void index="2">
+          <int>8</int>
+        </void>
+      </array>
+    </void>
+    <void index="2">
+      <array class="int" length="5">
+        <void index="1">
+          <int>6</int>
+        </void>
+        <void index="2">
+          <int>7</int>
+        </void>
+        <void index="4">
+          <int>8</int>
+        </void>
+      </array>
+    </void>
+  </array>
+</void>

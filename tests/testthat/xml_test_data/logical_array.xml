@@ -1,0 +1,10 @@
+<void property="testProperty1">
+  <array class="boolean" length="3">
+    <void index="0">
+      <boolean>true</boolean>
+    </void>
+    <void index="1">
+      <boolean>false</boolean>
+    </void>
+  </array>
+</void>

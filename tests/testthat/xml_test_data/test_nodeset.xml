@@ -1,0 +1,63 @@
+<object class="epp2011.core.sets.Workset" id="Workset0">
+  <void property="testProperty1">
+    <array class="int" length="3">
+      <void index="0">
+        <int>6</int>
+      </void>
+      <void index="1">
+        <int>-1</int>
+      </void>
+      <void index="2">
+        <int>8</int>
+      </void>
+    </array>
+  </void>
+  <void property="testProperty2">
+    <array class="[D" length="3">
+      <void index="0">
+        <array class="int" length="5">
+          <void index="0">
+            <int>6</int>
+          </void>
+          <void index="1">
+            <int>7</int>
+          </void>
+          <void index="2">
+             <int>8</int>
+          </void>
+        </array>
+      </void>
+      <void index="2">
+        <array class="int" length="5">
+          <void index="1">
+            <int>6</int>
+          </void>
+          <void index="2">
+            <int>7</int>
+          </void>
+          <void index="4">
+            <int>-1</int>
+          </void>
+        </array>
+      </void>
+    </array>
+  </void>
+  <void property="testProperty3">
+    <int>72</int>
+  </void>
+  <void property="testProperty4">
+    <double>0.1</double>
+  </void>
+  <void property="testProperty5">
+    <string>Example</string>
+  </void>
+  <void property="testProperty6">
+    <boolean>true</boolean>
+  </void>
+  <void property="testProperty7">
+    <object class="java.lang.Enum" method="valueOf">
+      <class>epp2011.EPPConstants$LocationType</class>
+      <string>URBAN</string>
+    </object>
+  </void>
+</object>

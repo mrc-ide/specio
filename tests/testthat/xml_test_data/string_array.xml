@@ -1,0 +1,10 @@
+<void property="testProperty1">
+  <array class="java.lang.String" length="3">
+    <void index="0">
+      <string>Gaborone (%)</string>
+    </void>
+    <void index="1">
+      <string>Francistown (%)</string>
+    </void>
+  </array>
+</void>
