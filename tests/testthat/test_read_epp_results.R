@@ -1,4 +1,4 @@
-context("read_spt")
+context("read_epp_results")
 
 test_that("Missing SPT data throws an error", {
   pjnz_path <- system.file("testdata", "Netherlands2017.PJNZ", package="specio")
@@ -31,4 +31,13 @@ test_that("Mozambique_Maputo_Cidade2018 SPT data is read correctly", {
   spt <- read_spt(pjnz_path)
   spt_ref <- readRDS("testdata/Mozambique_Maputo_Cidade2018_spt_data.rds")
   expect_equal(spt, spt_ref)
+})
+
+test_that("Botswana2019 SPU data is read correctly", {
+  pjnz_path <- "pjnz_testdata/Botswana2019.PJNZ"
+
+  spu_data <- read_spu(pjnz_path)
+  spu_ref <- readRDS("testdata/Botswana2019_spu_data.rds")
+  expect_equal(spu_data, spu_ref)
+
 })

@@ -1,4 +1,4 @@
-#' Load best fitting HIV incidence and prevalence data from SPT file.
+#' Read best fitting HIV incidence and prevalence data from SPT file.
 #'
 #' Locates SPT file within the PJNZ file and reads out the best fitting
 #' incidence and prevalence data into memory.
@@ -17,10 +17,7 @@
 #' read_spt(pjnz_path)
 #'
 read_spt <- function(pjnz_path){
-  spt_filename <- get_filename_from_extension("SPT", pjnz_path)
-  con <- unz(pjnz_path, spt_filename)
-  on.exit(close(con))
-  spt_file <- readLines(con)
+  spt_file <- readlines_from_path(pjnz_path, "SPT")
 
   ## Data for a particular region starts with "==" delimiter
   region_row_breaks <- which(spt_file == "==")
@@ -45,6 +42,61 @@ read_spt <- function(pjnz_path){
 
   names(spt_data) <- regions
   return(spt_data)
+}
+
+#' Read EPP uncertainty results from SPU file.
+#'
+#' @param pjnz_path Path to the PJNZ file.
+#'
+#' @return List containing uncertainty results for prevalence and incidence
+#' @export
+#'
+read_spu <- function(pjnz_path) {
+  spu <- readlines_from_path(pjnz_path, "SPU")
+
+  ## Series are delimitted by "=="
+  series_breaks <- which(spu == "==")
+  ## 2 "extra" rows per data set
+  no_of_years <- series_breaks[2] - series_breaks[1] - 2
+  resample_counts <- vnapply(spu[series_breaks[-length(series_breaks)] + 1],
+                             get_resample_count)
+
+  ## First block contains median prevalence and incidence, exclude this
+  spu_data <- lapply(series_breaks[-1],
+                     extract_incidence_prevalence,
+                     spt_data = spu,
+                     no_of_years = no_of_years)
+  ## Repeat each spu data block number of times as specified by its count
+  spu_data <- spu_data[rep(seq_along(resample_counts), resample_counts)]
+
+  return(list("incid" = get_incid_prev_results(spu_data, "incid"),
+              "prev" = get_incid_prev_results(spu_data, "prev")))
+}
+
+
+#' Pull out the count from a string e.g. "COUNT 1.0"
+#'
+#' @keywords internal
+#'
+get_resample_count <- function(count) {
+  as.numeric(strsplit(count, " ")[[1]][2])
+}
+
+#' Get incidence or prevalence as a matrix from the list of matrices
+#' representing the uncertainty results data.
+#'
+#' @param series_data The extracted series data as a list of matrices, one list
+#' entry for each resample.
+#' @param property The property to get from the series data. Either "incid" for
+#' incidence or "prev" for prevalence.
+#'
+#' @keywords internal
+#'
+get_incid_prev_results <- function(results, property) {
+  property_data <- lapply(results, function(x) x[, property, drop = FALSE])
+  prop <- matrix(unlist(property_data), nrow = nrow(property_data[[1]]))
+  rownames(prop) <- row.names(property_data[[1]])
+  prop
 }
 
 #' Extract incidence and prevalence for single region.

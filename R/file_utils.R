@@ -40,3 +40,10 @@ get_eppxml_workset <- function(pjnz_path) {
   return(properties)
 }
 
+readlines_from_path <- function(pjnz_path, extension) {
+  file <- get_filename_from_extension(extension, pjnz_path)
+  con <- unz(pjnz_path, file)
+  on.exit(close(con))
+  lines <- readLines(con)
+}
+

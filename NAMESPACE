@@ -3,3 +3,4 @@
 export(read_epp_data)
 export(read_epp_subpops)
 export(read_spt)
+export(read_spu)
