@@ -64,6 +64,12 @@ test_that("get_property throws error if no property can be found", {
                       " Expected only 1 property but found 0."))
 })
 
+test_that("get_property throws error when encountering unexpected type", {
+  xml_nodeset <- xml2::xml_children(xml_test_data$test_nodeset)
+  expect_error(get_property(xml_nodeset, "testProperty8"),
+               "Can't convert node of type unknown.")
+})
+
 test_that("get_property can return array property", {
   xml_nodeset <- xml2::xml_children(xml_test_data$test_nodeset)
   property1 <- get_property(xml_nodeset, "testProperty1")

@@ -60,4 +60,7 @@
       <string>URBAN</string>
     </object>
   </void>
+  <void property="testProperty8">
+    <unknown>72</unknown>
+  </void>
 </object>

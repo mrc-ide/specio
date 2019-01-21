@@ -161,7 +161,9 @@ get_conversion_function <- function(node, search = 1) {
     },
     array = get_array_property_data,
     object = get_enum_property,
-    stop("can't work out how to convert this")
+    stop(paste0("Can't convert node of type ",
+                xml2::xml_name(xml2::xml_child(node, search)),
+                "."))
   )
 }
 
