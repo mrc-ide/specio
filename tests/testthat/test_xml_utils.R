@@ -112,9 +112,9 @@ test_that("get field data works as expected", {
   field_node <- xml2::xml_children(xml_test_data$test_field_node)
   field_data <- get_fields(field_node)
   expect_equal(field_data, list(
-    stats::setNames("2004 BAIS", "name"),
-    stats::setNames(2004, "year"),
-    stats::setNames(24.68, "surveyHIV"),
-    stats::setNames(0.74, "surveyStandardError")
+    "name" = stats::setNames("2004 BAIS", "name"),
+    "year" = stats::setNames(2004, "year"),
+    "surveyHIV" = stats::setNames(24.68, "surveyHIV"),
+    "surveyStandardError" = stats::setNames(0.74, "surveyStandardError")
   ))
 })

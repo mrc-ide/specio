@@ -19,9 +19,6 @@
 read_epp_data <- function(pjnz_path) {
 
   workset <- get_eppxml_workset(pjnz_path)
-  if(is.null(workset)) {
-    return(NULL)
-  }
 
   epp_data <- list()
   attr(epp_data, "country") <- get_property(workset, "worksetCountry")
@@ -32,20 +29,22 @@ read_epp_data <- function(pjnz_path) {
   ## Spectrum defaults to "HSS mode", which is no ANC-RT data.
   input_mode <- "HSS"
 
-  region_datasets <- xml2::xml_find_all(
+  region_nodeset <- xml2::xml_find_all(
     workset, ".//object[@class='epp2011.core.sets.ProjectionSet']")
 
-  for (region_data in region_datasets) {
-    projset_id <- as.integer(gsub("[^0-9]", "", xml2::xml_attr(region_data,
-                                                               "id")))
-    region_properties <- xml2::xml_children(region_data)
+  for (region_node in region_nodeset) {
+    projset_id <- as.integer(gsub("[^0-9]", "",
+                                  xml2::xml_attr(region_node, "id")))
+    region_properties <- xml2::xml_children(region_node)
     names(region_properties) <- xml2::xml_attr(region_properties, "property")
     epp_region <- get_property(region_properties, "name")
 
     ## Only update input mode if specified in the ProjectionSet, otherwise use
     ## the previous value.
-    if(length(region_properties[["dataInputMode"]]) && length(
-      xml2::xml_find_first(region_properties[["dataInputMode"]], ".//string"))) {
+    input_mode_changed <- length(region_properties[["dataInputMode"]]) &&
+      length(xml2::xml_find_first(region_properties[["dataInputMode"]],
+                                  ".//string"))
+    if (input_mode_changed) {
       input_mode <- get_property(region_properties, "dataInputMode")
     }
 
@@ -83,9 +82,6 @@ read_epp_data <- function(pjnz_path) {
 #' @export
 read_epp_subpops <- function(pjnz_path) {
   workset <- get_eppxml_workset(pjnz_path)
-  if(is.null(workset)) {
-    return(NULL)
-  }
 
   epp_pops <- list()
   attr(epp_pops, "country") <- get_property(workset, "worksetCountry")
@@ -143,8 +139,8 @@ read_epp_subpops <- function(pjnz_path) {
 
   projset_ids <- sapply(epp_pops$subpops, attr, "projset_id")
   assign_ids <- sapply(epp_pops$subpops, attr, "assign_id")
-  assign_name <- names(projset_ids)[match(assign_ids, projset_ids)]
 
+  assign_name <- names(projset_ids)[match(assign_ids, projset_ids)]
   epp_pops$subpops <- Map("attr<-", epp_pops$subpops, "assign_name", assign_name)
 
   class(epp_pops) <- "eppsubp"
@@ -248,19 +244,21 @@ get_anc_data <- function(projection_set, input_mode) {
 #'
 #' @keywords internal
 get_census_data <- function(projection_set, input_mode) {
-  if (length(projection_set[["censusPMTCTSurvData"]]) && input_mode == "ANC") {
-    census_prevalence <- get_property(projection_set, "censusPMTCTSurvData")
-    census_prevalence <- tidy_data_for_epp(census_prevalence, TRUE, TRUE)
-
-    census_sample_size <- get_property(projection_set, "censusPMTCTSampleSizes")
-    census_sample_size <- tidy_data_for_epp(census_sample_size)
-
-    census_data <- data.frame(year = as.integer(names(census_prevalence)),
-                              prev = census_prevalence,
-                              n = census_sample_size)
-    census_data <- census_data[which(
-      !is.na(census_data$prev) | !is.na(census_data$n)), ]
+  if (length(projection_set[["censusPMTCTSurvData"]]) == 0 || input_mode != "ANC") {
+    return(NULL)
   }
+  census_prevalence <- get_property(projection_set, "censusPMTCTSurvData")
+  census_prevalence <- tidy_data_for_epp(census_prevalence, TRUE, TRUE)
+
+  census_sample_size <- get_property(projection_set, "censusPMTCTSampleSizes")
+  census_sample_size <- tidy_data_for_epp(census_sample_size)
+
+  census_data <- data.frame(year = as.integer(names(census_prevalence)),
+                            prev = census_prevalence,
+                            n = census_sample_size)
+  census_data <- census_data[which(
+    !is.na(census_data$prev) | !is.na(census_data$n)), ]
+  census_data
 }
 
 #' Tidy data for EPP.
@@ -284,13 +282,14 @@ get_census_data <- function(projection_set, input_mode) {
 #'
 #' @keywords internal
 tidy_data_for_epp <- function(dat, is_percentage = FALSE, add_names = FALSE,
-                              site_names = NA) {
+                              site_names = NULL) {
   dat[dat == -1] <- NA
-  if (is_percentage & is.numeric(dat)) {
+  if (is_percentage && is.numeric(dat)) {
     dat <- dat/100
   }
   if (add_names) {
-    if (length(site_names) & is.matrix(dat)) {
+    ## Tidy years
+    if (!is.null(site_names) && is.matrix(dat)) {
       dimnames(dat) <- list(site = site_names, year = 1985+0:(ncol(dat)-1))
     } else if (is.vector(dat)) {
       names(dat) <- 1985+0:(length(dat)-1)
@@ -348,36 +347,50 @@ get_hh_survey_data <- function(projection_set) {
     ## structure.
     surveys <- xml2::xml_children(xml2::xml_children(
       projection_set[["surveyData"]]))
-    hh_survey <- lapply(surveys, parse_survey)
-    hh_survey <- as.data.frame(do.call(rbind, hh_survey),
-                               stringsAsFactors = FALSE)
-    hh_survey <- as.data.frame(lapply(hh_survey, utils::type.convert))
-
-    hh_survey$prev <- hh_survey$prev / 100
-    hh_survey$se <- hh_survey$se / 100
-    hh_survey$incid <- hh_survey$incid / 100
-    hh_survey$incid_se <- hh_survey$incid_se / 100
+    survey_data <- lapply(surveys, parse_survey)
+    hh_survey <- data.frame(do.call(rbind.data.frame, survey_data))
+    v_percent <- c("prev", "se", "incid", "incid_se")
+    hh_survey[v_percent] <- hh_survey[v_percent] / 100
+    rownames(hh_survey) <- NULL
   }
-  return(hh_survey)
+  hh_survey
 }
 
-## Consider refactoring when we have test case which covers this
-## Used for Spectrum EPP data structure for HH survey data impl in 2019 version
+#' Parse survey data into expected return format.
+#'
+#' Parses survey data as stored in 2019 version of spectrum.
+#'
+#' @param nodeset for a survey
+#'
+#' @return parsed survey data
+#' @export
+#'
+#' @keywords internal
 parse_survey <- function(survey) {
   fields <- get_fields(survey)
-  cols <- c("year" = "year",
-            "surveyHIV" = "prev",
-            "surveyStandardError" = "se",
-            "n",
-            "used",
-            "incidence" = "incid",
-            "standardError" = "incid_se",
-            "prev_incid_corr",
-            "incidence_cohort" = "incid_cohort")
-
-  names(fields) <- cols[names(fields)]
-  fields[setdiff(cols, names(fields))] <- NA
-  fields["used"] <- TRUE
-  fields[cols]
+  return_names <- c("year" = "year",
+                    "surveyHIV" = "prev",
+                    "surveyStandardError" = "se",
+                    "n" = "n",
+                    "used" = "used",
+                    "incidence" = "incid",
+                    "standardError" = "incid_se",
+                    "prev_incid_corr" = "prev_incid_corr",
+                    "incidence_cohort" = "incid_cohort")
+  return_values <- data.frame(
+    year = NA_integer_,
+    prev = NA_real_,
+    se = NA_real_,
+    n = NA,
+    used = TRUE,
+    incid = NA_real_,
+    incid_se = NA_real_,
+    prev_incid_corr = NA,
+    incid_cohort = NA)
+  names(fields) <- return_names[match(names(fields), names(return_names))]
+  survey_data <- lapply(names(return_values),
+                   function(x) fields[[x]][[1]] %||% return_values[[x]])
+  names(survey_data) <- names(return_values)
+  survey_data
 }
 

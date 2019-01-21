@@ -176,7 +176,9 @@ get_conversion_function <- function(node, search = 1) {
 #'
 get_fields <- function(node) {
   field_nodes <- xml2::xml_find_all(node, './/void[@method="getField"]')
-  lapply(field_nodes, get_field_data)
+  fields <- lapply(field_nodes, get_field_data)
+  names(fields) <- names(unlist(fields))
+  fields
 }
 
 #' Get field data from xml node representing serialised field.
@@ -203,3 +205,4 @@ get_field_data <- function(field_node) {
   stats::setNames(field_value_converter(value_node),
                   field_title_converter(field_node))
 }
+
