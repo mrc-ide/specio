@@ -65,7 +65,7 @@ read_spt <- function(pjnz_path){
 #'
 extract_incidence_prevalence <- function(break_index, spt_data, no_of_years) {
   dat <- spt_data[seq(break_index-no_of_years, break_index-1)]
-  region_data <- read.table(text = dat, sep = ",", row.names = 1)
+  region_data <- utils::read.table(text = dat, sep = ",", row.names = 1)
   region_data[,1:2] <- region_data[,1:2]/100
   names(region_data) <- c("prev", "incid", "pop")[seq_along(region_data)]
   return(region_data)

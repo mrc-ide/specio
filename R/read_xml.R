@@ -363,7 +363,6 @@ get_hh_survey_data <- function(projection_set) {
 #' @param nodeset for a survey
 #'
 #' @return parsed survey data
-#' @export
 #'
 #' @keywords internal
 parse_survey <- function(survey) {

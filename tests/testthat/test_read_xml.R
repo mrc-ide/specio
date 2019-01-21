@@ -36,7 +36,7 @@ test_that("DominicanRepublic2017 XML data is read correctly", {
 })
 
 test_that("Botswana2019 XML data is read correctly", {
-  pjnz_path <- system.file("testdata", "Botswana2019.PJNZ", package="specio")
+  pjnz_path <- "pjnz_testdata/Botswana2019.PJNZ"
 
   epp_data <- specio::read_epp_data(pjnz_path)
   epp_data_ref <- readRDS("testdata/Botswana2019_epp_data.rds")

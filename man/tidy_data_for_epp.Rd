@@ -5,7 +5,7 @@
 \title{Tidy data for EPP.}
 \usage{
 tidy_data_for_epp(dat, is_percentage = FALSE, add_names = FALSE,
-  site_names = NA)
+  site_names = NULL)
 }
 \arguments{
 \item{dat}{Data to be tidied.}
