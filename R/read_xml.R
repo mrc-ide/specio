@@ -137,8 +137,8 @@ read_epp_subpops <- function(pjnz_path) {
     epp_pops$subpops[[epp_region]] <- subpop_data
   }
 
-  projset_ids <- sapply(epp_pops$subpops, attr, "projset_id")
-  assign_ids <- sapply(epp_pops$subpops, attr, "assign_id")
+  projset_ids <- lapply(epp_pops$subpops, attr, "projset_id")
+  assign_ids <- lapply(epp_pops$subpops, attr, "assign_id")
 
   assign_name <- names(projset_ids)[match(assign_ids, projset_ids)]
   epp_pops$subpops <- Map("attr<-", epp_pops$subpops, "assign_name", assign_name)
