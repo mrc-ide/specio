@@ -36,7 +36,7 @@ get_eppxml_workset <- function(pjnz_path) {
   epp_xml <- xml2::read_xml(con)
   properties <- xml2::xml_children(xml2::xml_children(epp_xml))
   names(properties) <- xml2::xml_attr(properties, "property")
-  stopifnot(length(properities) > 0)
+  stopifnot(length(properties) > 0)
   return(properties)
 }
 
