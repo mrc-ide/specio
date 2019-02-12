@@ -13,10 +13,9 @@
 #' @export
 #'
 #' @examples
-#' pjnz_path <- system.file("testdata", "Botswana2018.PJNZ", package="specio")
+#' pjnz_path <- system.file("testdata", "Botswana2018.PJNZ", package = "specio")
 #' read_spt(pjnz_path)
-#'
-read_spt <- function(pjnz_path){
+read_spt <- function(pjnz_path) {
   spt_file <- readlines_from_path(pjnz_path, "SPT")
 
   ## Data for a particular region starts with "==" delimiter
@@ -36,9 +35,10 @@ read_spt <- function(pjnz_path){
 
   ## Ignore first break as the "National" data is repeated
   spt_data <- lapply(incid_prev_row_breaks[-1],
-                     extract_incidence_prevalence,
-                     spt_data = spt_file,
-                     no_of_years = no_of_years)
+    extract_incidence_prevalence,
+    spt_data = spt_file,
+    no_of_years = no_of_years
+  )
 
   names(spt_data) <- regions
   return(spt_data)
@@ -58,19 +58,24 @@ read_spu <- function(pjnz_path) {
   series_breaks <- which(spu == "==")
   ## 2 "extra" rows per data set
   no_of_years <- series_breaks[2] - series_breaks[1] - 2
-  resample_counts <- vnapply(spu[series_breaks[-length(series_breaks)] + 1],
-                             get_resample_count)
+  resample_counts <- vnapply(
+    spu[series_breaks[-length(series_breaks)] + 1],
+    get_resample_count
+  )
 
   ## First block contains median prevalence and incidence, exclude this
   spu_data <- lapply(series_breaks[-1],
-                     extract_incidence_prevalence,
-                     spt_data = spu,
-                     no_of_years = no_of_years)
+    extract_incidence_prevalence,
+    spt_data = spu,
+    no_of_years = no_of_years
+  )
   ## Repeat each spu data block number of times as specified by its count
   spu_data <- spu_data[rep(seq_along(resample_counts), resample_counts)]
 
-  return(list("incid" = get_incid_prev_results(spu_data, "incid"),
-              "prev" = get_incid_prev_results(spu_data, "prev")))
+  return(list(
+    "incid" = get_incid_prev_results(spu_data, "incid"),
+    "prev" = get_incid_prev_results(spu_data, "prev")
+  ))
 }
 
 
@@ -116,10 +121,9 @@ get_incid_prev_results <- function(results, property) {
 #' @keywords internal
 #'
 extract_incidence_prevalence <- function(break_index, spt_data, no_of_years) {
-  dat <- spt_data[seq(break_index-no_of_years, break_index-1)]
+  dat <- spt_data[seq(break_index - no_of_years, break_index - 1)]
   region_data <- utils::read.table(text = dat, sep = ",", row.names = 1)
-  region_data[,1:2] <- region_data[,1:2]/100
+  region_data[, 1:2] <- region_data[, 1:2] / 100
   names(region_data) <- c("prev", "incid", "pop")[seq_along(region_data)]
   return(region_data)
 }
-

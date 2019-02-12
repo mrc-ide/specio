@@ -38,36 +38,48 @@ test_that("parse_array can parse logical arrays with missing values", {
 
 test_that("parse_matrix throws error if node is not of correct type", {
   xml_node <- xml2::xml_child(xml_test_data$test_array_1)
-  expect_error(parse_matrix(xml_node), paste0("Can't parse matrix for array of",
-    " type int, array class must be '[D' or '[I'."), fixed = TRUE)
+  expect_error(parse_matrix(xml_node), paste0(
+    "Can't parse matrix for array of",
+    " type int, array class must be '[D' or '[I'."
+  ), fixed = TRUE)
 })
 
 test_that("parse_matix throws error if matrix is ragged", {
   xml_node <- xml2::xml_child(xml_test_data$test_ragged_matrix)
-  expect_error(parse_matrix(xml_node), paste0("Not all rows are the same ",
-    "length, can't parse matrix. This might be a ragged array."))
+  expect_error(parse_matrix(xml_node), paste0(
+    "Not all rows are the same ",
+    "length, can't parse matrix. This might be a ragged array."
+  ))
 })
 
 test_that("parse_matix can parse matrix with missing rows", {
   xml_node <- xml2::xml_child(xml_test_data$test_matrix)
   parsed_matrix <- parse_matrix(xml_node)
   expect_equal(typeof(parsed_matrix), "integer")
-  expect_equal(parsed_matrix, rbind(c(6, 7, 8, 0 ,0),
-                                   c(NA, NA, NA, NA, NA),
-                                   c(0, 6, 7, 0, 8)))
+  expect_equal(parsed_matrix, rbind(
+    c(6, 7, 8, 0, 0),
+    c(NA, NA, NA, NA, NA),
+    c(0, 6, 7, 0, 8)
+  ))
 })
 
 test_that("get_property throws error if no property can be found", {
   xml_nodeset <- xml2::xml_children(xml_test_data$test_nodeset)
-  expect_error(get_property(xml_nodeset, "prop"),
-               paste0("Can't get property data for property prop from nodeset.",
-                      " Expected only 1 property but found 0."))
+  expect_error(
+    get_property(xml_nodeset, "prop"),
+    paste0(
+      "Can't get property data for property prop from nodeset.",
+      " Expected only 1 property but found 0."
+    )
+  )
 })
 
 test_that("get_property throws error when encountering unexpected type", {
   xml_nodeset <- xml2::xml_children(xml_test_data$test_nodeset)
-  expect_error(get_property(xml_nodeset, "testProperty8"),
-               "Can't convert node of type unknown.")
+  expect_error(
+    get_property(xml_nodeset, "testProperty8"),
+    "Can't convert node of type unknown."
+  )
 })
 
 test_that("get_property can return array property", {
@@ -79,9 +91,11 @@ test_that("get_property can return array property", {
 test_that("get_property can return matrix property", {
   xml_nodeset <- xml2::xml_children(xml_test_data$test_nodeset)
   property2 <- get_property(xml_nodeset, "testProperty2")
-  expect_equal(property2, rbind(c(6, 7, 8, 0 ,0),
-                                c(NA, NA, NA, NA, NA),
-                                c(0, 6, 7, 0, -1)))
+  expect_equal(property2, rbind(
+    c(6, 7, 8, 0, 0),
+    c(NA, NA, NA, NA, NA),
+    c(0, 6, 7, 0, -1)
+  ))
 })
 
 test_that("get_property can return integer property", {

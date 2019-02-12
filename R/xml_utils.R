@@ -24,19 +24,21 @@
 parse_array <- function(xml_node) {
   a_length <- as.integer(xml2::xml_attr(xml_node, "length"))
   a_mode <- switch(xml2::xml_attr(xml_node, "class"),
-                   int = "integer",
-                   double = "numeric",
-                   boolean = "logical",
-                   java.lang.String = "character")
+    int = "integer",
+    double = "numeric",
+    boolean = "logical",
+    java.lang.String = "character"
+  )
   arr <- vector(a_mode, a_length)
 
   elem <- xml2::xml_children(xml_node)
   idx <- as.integer(xml2::xml_attr(elem, "index")) + 1L ## Java is 0-based
   convert_elem <- switch(a_mode,
-                         integer = xml2::xml_integer,
-                         numeric = xml2::xml_double,
-                         logical = function(x) as.logical(xml2::xml_text(x)),
-                         character = xml2::xml_text)
+    integer = xml2::xml_integer,
+    numeric = xml2::xml_double,
+    logical = function(x) as.logical(xml2::xml_text(x)),
+    character = xml2::xml_text
+  )
   arr[idx] <- convert_elem(elem)
 
   return(arr)
@@ -57,25 +59,29 @@ parse_array <- function(xml_node) {
 #'
 parse_matrix <- function(xml_node) {
   node_class <- xml2::xml_attr(xml_node, "class")
-  if(!node_class %in% c("[D", "[I")) {
-    stop(paste0("Can't parse matrix for array of type ",
-                node_class,
-                ", array class must be '[D' or '[I'."))
+  if (!node_class %in% c("[D", "[I")) {
+    stop(paste0(
+      "Can't parse matrix for array of type ",
+      node_class,
+      ", array class must be '[D' or '[I'."
+    ))
   }
   rows <- xml2::xml_children(xml_node)
   idx <- as.integer(xml2::xml_attr(rows, "index")) + 1L ## Java is 0-based
   parsed_rows <- lapply(xml2::xml_find_first(rows, "array"), parse_array)
   column_length <- length(parsed_rows[[1]])
-  if(!all(lengths(parsed_rows) == column_length)) {
-    stop(paste0("Not all rows are the same length, can't parse matrix. This ",
-                "might be a ragged array."))
+  if (!all(lengths(parsed_rows) == column_length)) {
+    stop(paste0(
+      "Not all rows are the same length, can't parse matrix. This ",
+      "might be a ragged array."
+    ))
   }
 
   ## Put rows at correct index in returned matrix
   no_of_rows <- as.integer(xml2::xml_attr(xml_node, "length"))
   parsed_matrix <- matrix(nrow = no_of_rows, ncol = column_length)
   for (i in seq_along(parsed_rows)) {
-    parsed_matrix[idx[i],] <- parsed_rows[[i]]
+    parsed_matrix[idx[i], ] <- parsed_rows[[i]]
   }
   parsed_matrix
 }
@@ -92,7 +98,7 @@ parse_matrix <- function(xml_node) {
 #'
 get_array_property_data <- function(node) {
   property_data <- xml2::xml_find_all(node, "array")
-  if(xml2::xml_attr(property_data, "class") %in% c("[D", "[I")) {
+  if (xml2::xml_attr(property_data, "class") %in% c("[D", "[I")) {
     parsed_data <- parse_matrix(property_data)
   } else {
     parsed_data <- parse_array(property_data)
@@ -128,9 +134,11 @@ get_enum_property <- function(node) {
 get_property <- function(nodeset, property) {
   property_node <- nodeset[xml2::xml_attr(nodeset, "property") == property]
   if (length(property_node) != 1) {
-    stop(paste0("Can't get property data for property ", property,
-                " from nodeset. Expected only 1 property but found ",
-                length(property_node), "."))
+    stop(paste0(
+      "Can't get property data for property ", property,
+      " from nodeset. Expected only 1 property but found ",
+      length(property_node), "."
+    ))
   }
   conversion_function <- get_conversion_function(property_node)
   conversion_function(property_node)
@@ -154,16 +162,22 @@ get_property <- function(nodeset, property) {
 get_conversion_function <- function(node, search = 1) {
   switch(xml2::xml_name(xml2::xml_child(node, search)),
     string = function(x) xml2::xml_text(xml2::xml_child(x, search)),
-    int = function(x) { xml2::xml_integer(xml2::xml_child(x, search)) },
-    double = function(x) { xml2::xml_double(xml2::xml_child(x, search)) },
+    int = function(x) {
+      xml2::xml_integer(xml2::xml_child(x, search))
+    },
+    double = function(x) {
+      xml2::xml_double(xml2::xml_child(x, search))
+    },
     boolean = function(x) {
       as.logical(xml2::xml_text(xml2::xml_child(x, search)))
     },
     array = get_array_property_data,
     object = get_enum_property,
-    stop(paste0("Can't convert node of type ",
-                xml2::xml_name(xml2::xml_child(node, search)),
-                "."))
+    stop(paste0(
+      "Can't convert node of type ",
+      xml2::xml_name(xml2::xml_child(node, search)),
+      "."
+    ))
   )
 }
 
@@ -204,7 +218,8 @@ get_field_data <- function(field_node) {
   field_title_converter <- get_conversion_function(field_node)
   value_node <- xml2::xml_child(field_node, 2)
   field_value_converter <- get_conversion_function(value_node, 2)
-  stats::setNames(field_value_converter(value_node),
-                  field_title_converter(field_node))
+  stats::setNames(
+    field_value_converter(value_node),
+    field_title_converter(field_node)
+  )
 }
-

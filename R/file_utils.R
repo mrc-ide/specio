@@ -12,11 +12,14 @@
 #'
 get_filename_from_extension <- function(file_extension, path_to_zip) {
   filename <- grep(paste0("\\.", file_extension, "$"),
-                   utils::unzip(path_to_zip, list=TRUE)$Name,
-                   value=TRUE)
+    utils::unzip(path_to_zip, list = TRUE)$Name,
+    value = TRUE
+  )
   if (length(filename) != 1) {
-    stop(sprintf("Only one file of type %s must exist at path %s, found %d.",
-                 file_extension, path_to_zip, length(filename)))
+    stop(sprintf(
+      "Only one file of type %s must exist at path %s, found %d.",
+      file_extension, path_to_zip, length(filename)
+    ))
   }
   return(filename)
 }
@@ -46,4 +49,3 @@ readlines_from_path <- function(pjnz_path, extension) {
   on.exit(close(con))
   lines <- readLines(con)
 }
-

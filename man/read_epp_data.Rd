@@ -22,7 +22,6 @@ for tag "object", and then selecting objects with "class" attribute equal to
 "epp2011.core.sets.ProjectionSet".
 }
 \examples{
-pjnz_path <- system.file("testdata", "Botswana2018.PJNZ", package="specio")
+pjnz_path <- system.file("testdata", "Botswana2018.PJNZ", package = "specio")
 read_epp_data(pjnz_path)
-
 }

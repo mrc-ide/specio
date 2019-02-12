@@ -22,7 +22,6 @@ Reads best fitting prevalence and incidence and population data for all
 regions. The outputs one data frame for each region in the SPT file.
 }
 \examples{
-pjnz_path <- system.file("testdata", "Botswana2018.PJNZ", package="specio")
+pjnz_path <- system.file("testdata", "Botswana2018.PJNZ", package = "specio")
 read_spt(pjnz_path)
-
 }
