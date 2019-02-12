@@ -113,48 +113,62 @@ read_epp_subpops <- function(pjnz_path) {
   )
 
   for (region_data in region_datasets) {
-    projset_id <- as.integer(gsub(
-      "[^0-9]", "", xml2::xml_attr(region_data, "id")
-    ))
-    region_properties <- xml2::xml_children(region_data)
-    names(region_properties) <- xml2::xml_attr(region_properties, "property")
-
-    epp_region <- get_property(region_properties, "name")
-
-    subpop_data <- data.frame(
-      year = start_year:end_year,
-      pop15to49 = get_property(region_properties, "pop15to49"),
-      pop15 = get_property(region_properties, "pop15"),
-      pop50 = get_property(region_properties, "pop50"),
-      netmigr = get_property(region_properties, "netMigration")
+    epp_region <- get_property(xml2::xml_children(region_data), "name")
+    epp_pops$subpops[[epp_region]] <- parse_region_data(
+      region_data, start_year, end_year, epidemic_type
     )
-    attr(subpop_data, "projset_id") <- projset_id
-    attr(subpop_data, "epidemic.start") <- as.integer(
-      get_property(region_properties, "priorT0vr")
-    )
-
-    if (epidemic_type == "concentrated") {
-      concentrated_data <- get_concentrated_epidemic_data(region_properties)
-      attr(subpop_data, "subpop") <- names(which(concentrated_data$subpop))
-      attr(subpop_data, "percent_male") <- concentrated_data$percent_male
-      attr(subpop_data, "turnover") <- concentrated_data$turnover
-      attr(subpop_data, "duration") <- concentrated_data$duration
-      attr(subpop_data, "assign_id") <- concentrated_data$assign_id
-      attr(subpop_data, "assignmentType") <- concentrated_data$assignment_type
-    }
-
-    epp_pops$subpops[[epp_region]] <- subpop_data
   }
 
   projset_ids <- lapply(epp_pops$subpops, attr, "projset_id")
   assign_ids <- lapply(epp_pops$subpops, attr, "assign_id")
 
   assign_name <- names(projset_ids)[match(assign_ids, projset_ids)]
-  epp_pops$subpops <- Map("attr<-", epp_pops$subpops, "assign_name", assign_name)
+  epp_pops$subpops <- Map(
+    "attr<-", epp_pops$subpops, "assign_name", assign_name
+  )
 
   class(epp_pops) <- "eppsubp"
 
   return(epp_pops)
+}
+
+#' Tidy subpopulation data about a specific region.
+#'
+#' @param region_data Data about a single region for a specific subpop.
+#' @param start_year Start year of data set.
+#' @param end_year End year of the data set.
+#' @param epidemic_type Type of the epidemic. Concentrated or generalized.
+#'
+#' @keywords internal
+parse_region_data <- function(region_data, start_year, end_year, epidemic_type) {
+  projset_id <- as.integer(gsub(
+    "[^0-9]", "", xml2::xml_attr(region_data, "id")
+  ))
+  region_properties <- xml2::xml_children(region_data)
+  names(region_properties) <- xml2::xml_attr(region_properties, "property")
+
+  subpop_data <- data.frame(
+    year = start_year:end_year,
+    pop15to49 = get_property(region_properties, "pop15to49"),
+    pop15 = get_property(region_properties, "pop15"),
+    pop50 = get_property(region_properties, "pop50"),
+    netmigr = get_property(region_properties, "netMigration")
+  )
+  attr(subpop_data, "projset_id") <- projset_id
+  attr(subpop_data, "epidemic.start") <- as.integer(
+    get_property(region_properties, "priorT0vr")
+  )
+
+  if (epidemic_type == "concentrated") {
+    concentrated_data <- get_concentrated_epidemic_data(region_properties)
+    attr(subpop_data, "subpop") <- names(which(concentrated_data$subpop))
+    attr(subpop_data, "percent_male") <- concentrated_data$percent_male
+    attr(subpop_data, "turnover") <- concentrated_data$turnover
+    attr(subpop_data, "duration") <- concentrated_data$duration
+    attr(subpop_data, "assign_id") <- concentrated_data$assign_id
+    attr(subpop_data, "assignmentType") <- concentrated_data$assignment_type
+  }
+  subpop_data
 }
 
 #' Get concentrated epidemic data from EPP data set.
@@ -262,7 +276,9 @@ get_anc_data <- function(projection_set, input_mode) {
 #'
 #' @keywords internal
 get_census_data <- function(projection_set, input_mode) {
-  if (length(projection_set[["censusPMTCTSurvData"]]) == 0 || input_mode != "ANC") {
+  if (
+    length(projection_set[["censusPMTCTSurvData"]]) == 0 || input_mode != "ANC"
+  ) {
     return(NULL)
   }
   census_prevalence <- get_property(projection_set, "censusPMTCTSurvData")
