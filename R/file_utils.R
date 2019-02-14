@@ -49,3 +49,14 @@ readlines_from_path <- function(pjnz_path, extension) {
   on.exit(close(con))
   lines <- readLines(con)
 }
+
+#' Get data from DP file.
+#'
+#' @param pjnz_path Path to zip containing DP file.
+#'
+#' @return The data from file read as a csv.
+#'
+get_dp_data <- function(pjnz_path) {
+  dpfile <- get_filename_from_extension("DP", pjnz_path)
+  csv <- read.csv(unz(pjnz_path, dpfile), as.is = TRUE)
+}
