@@ -140,7 +140,7 @@ read_epp_subpops <- function(pjnz_path) {
 #' @param epidemic_type Type of the epidemic. Concentrated or generalized.
 #'
 #' @keywords internal
-parse_region_data <- function(region_data, start_year, end_year, epidemic_type) {
+parse_region_data <- function(region_data, start_year, end_year, epi_type) {
   projset_id <- as.integer(gsub(
     "[^0-9]", "", xml2::xml_attr(region_data, "id")
   ))
@@ -159,7 +159,7 @@ parse_region_data <- function(region_data, start_year, end_year, epidemic_type) 
     get_property(region_properties, "priorT0vr")
   )
 
-  if (epidemic_type == "concentrated") {
+  if (epi_type == "concentrated") {
     concentrated_data <- get_concentrated_epidemic_data(region_properties)
     attr(subpop_data, "subpop") <- names(which(concentrated_data$subpop))
     attr(subpop_data, "percent_male") <- concentrated_data$percent_male

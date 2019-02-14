@@ -4,7 +4,7 @@
 \alias{parse_region_data}
 \title{Tidy subpopulation data about a specific region.}
 \usage{
-parse_region_data(region_data, start_year, end_year, epidemic_type)
+parse_region_data(region_data, start_year, end_year, epi_type)
 }
 \arguments{
 \item{region_data}{Data about a single region for a specific subpop.}
