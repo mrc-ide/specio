@@ -58,5 +58,5 @@ readlines_from_path <- function(pjnz_path, extension) {
 #'
 get_dp_data <- function(pjnz_path) {
   dpfile <- get_filename_from_extension("DP", pjnz_path)
-  csv <- read.csv(unz(pjnz_path, dpfile), as.is = TRUE)
+  csv <- utils::read.csv(unz(pjnz_path, dpfile), as.is = TRUE)
 }
