@@ -21,3 +21,20 @@ vcapply <- function(X, FUN, ...) {
 data_frame <- function(...) {
   data.frame(..., stringsAsFactors = FALSE)
 }
+
+strict_list <- function(...) {
+  ret <- list(...)
+  class(ret) <- "strict_list"
+  ret
+}
+
+"$.strict_list" <- function(x, name) {
+  x[[name]]
+}
+
+"[[.strict_list" <- function(x, name, ...) {
+  if (!(name %in% names(x))) {
+    stop(sprintf("Element '%s' does not exist.", name))
+  }
+  NextMethod("[[")
+}
