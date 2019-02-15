@@ -2,7 +2,7 @@
 % Please edit documentation in R/dp_file_utils.R
 \name{get_last_non_na_column}
 \alias{get_last_non_na_column}
-\title{Get the column index of the last non-NA column.}
+\title{Get the column index of the last non-NA non-empty column.}
 \usage{
 get_last_non_na_column(dp_data)
 }
@@ -10,8 +10,9 @@ get_last_non_na_column(dp_data)
 \item{dp_data}{The subset of dp_data to check.}
 }
 \description{
-This locates the last non-NA column i.e. the last column which contains
-data from a subset of the dp_data. Used to remove spurious NAs appended
-to the end of the data due to using a csv to store data.
+This locates the last non-NA non-empty column i.e. the last column which
+contains data from a subset of the dp_data. Used to remove spurious NAs or
+empty strings (depending on column type) appended to the end of the data due
+to using a csv to store data.
 }
 \keyword{internal}

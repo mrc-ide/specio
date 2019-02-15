@@ -62,6 +62,11 @@ testthat::test_that("scalar properties can be retrieved", {
   expect_equal(version, 5.1)
 })
 
+testthat::test_that("can get notes from DP data", {
+  notes <- get_dp_notes("ValidDate MV", dp_data)
+  expect_equal(notes, "03-20-18  11:52:25 AM")
+})
+
 testthat::test_that("get_last_non_na_column correctly identifies column", {
   example <- rbind(
     c(1, 2, 3, NA, NA),
