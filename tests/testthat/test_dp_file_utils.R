@@ -57,6 +57,11 @@ testthat::test_that("properties can be retrieved from DP file", {
   expect_equal(dim(new_art_patients), c(2, 56))
 })
 
+testthat::test_that("scalar properties can be retrieved", {
+  version <- get_dp_property("VersionNum MV2", dp_data)
+  expect_equal(version, 5.1)
+})
+
 testthat::test_that("get_last_non_na_column correctly identifies column", {
   example <- rbind(
     c(1, 2, 3, NA, NA),
@@ -89,4 +94,17 @@ testthat::test_that("get_last_non_na_column correctly identifies column", {
   )
   column <- get_last_non_na_column(example)
   expect_equal(column, 0)
+})
+
+testthat::test_that("Spectrum version can be found from data", {
+  spectrum_version <- get_spectrum_version(dp_data)
+  expect_equal(spectrum_version, "Spectrum2017")
+
+  spectrum_version <- get_spectrum_version(dp_data_2016)
+  expect_equal(spectrum_version, "Spectrum2016")
+
+  expect_error(
+    get_spectrum_version(malformed_data),
+    "Spectrum DP file version not recognised. Only Spectrum versions from 2016 onwards are supported."
+  )
 })
