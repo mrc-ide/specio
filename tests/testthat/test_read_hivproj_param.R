@@ -10,9 +10,9 @@ test_that("Botswana2017 hivproj data is read correctly", {
 
 
 test_that("get_property gets the correct data", {
-  prop <- get_tag_data("version", dp_data)
+  prop <- get_property_data("version", dp_data)
   expect_equal(prop, 5.1)
 
-  prop <- get_tag_data("valid_date", dp_data)
+  prop <- get_property_data("valid_date", dp_data)
   expect_equal(prop, "03-20-18  11:52:25 AM")
 })

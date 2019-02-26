@@ -4,12 +4,12 @@
 \alias{row_contains_data}
 \title{Check whether a row contains data.}
 \usage{
-row_contains_data(index, dp_data)
+row_contains_data(dp_data, index)
 }
 \arguments{
-\item{index}{The index of the row to check.}
-
 \item{dp_data}{The dp_data to check.}
+
+\item{index}{The index of the row to check.}
 }
 \description{
 A row is considered to contain data if the fields from the 'Data' column

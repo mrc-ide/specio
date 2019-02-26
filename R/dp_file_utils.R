@@ -1,31 +1,17 @@
-#' Get a property from the DP file.
-#'
-#' Finds a property via a matching "Tag" and extracts the data contained in
-#' the tag.
-#'
-#' @param property Property to get.
-#' @param dp_data Full set of untidied dp data.
-#'
-#' @return The tidied property data.
-#'
-#' @keywords internal
-get_dp_property <- function(property, dp_data) {
-  range <- get_data_indices(property, dp_data)
 
-  if (row_contains_data(range$start, dp_data)) {
-    data <- get_data(dp_data[seq.int(range$start, range$end - 1), ])
-  } else {
-    desc_indices <- get_description_indices(range$start, range$end, dp_data)
-    data_blocks <- c(desc_indices, range$end)
-    data <- list()
-    for (iter in seq_along(desc_indices)) {
-      desc <- dp_data[data_blocks[iter], "Description"]
-      data[[desc]] <- get_data(
-        dp_data[seq.int(data_blocks[iter], data_blocks[iter + 1] - 1), ]
-      )
-    }
+get_raw_tag_data <- function(tag, dp_data) {
+  start_row <- which(dp_data[, "Tag"] == get_full_tag(tag))
+  if (length(start_row) != 1) {
+    stop(
+      sprintf("Can't find exactly 1 property matching Tag %s, found %i.",
+              tag, length(start_row))
+    )
   }
-  data
+  end_row <- next_index("<End>", start_row, "Tag", dp_data)
+  data_start <- next_index("<Value>", start_row, "Description", dp_data)
+  ## Similarly the last row always only contains the end tag so we don't want
+  ## to return this.
+  dp_data[seq.int(data_start, end_row - 1), ]
 }
 
 #' Get the start and end indices of a particular property within full dataset.
@@ -50,20 +36,6 @@ get_data_indices <- function(property, dp_data) {
 
   data_start <- next_index("<Value>", start_row, "Description", dp_data)
   list(start = data_start, end = end_row)
-}
-
-#' Get the notes column for a particular property from DP data.
-#'
-#' @param property Property to get notes for.
-#' @param dp_data Full set of untidied dp data.
-#'
-#' @return The notes.
-#'
-#' @keywords internal
-get_dp_notes <- function(property, dp_data) {
-  range <- get_data_indices(property, dp_data)
-  ## Use end - 1 to ignore row containing <End> tag.
-  dp_data[seq.int(range$start, range$end - 1), "Notes"]
 }
 
 #' Get the next index of a tag.
@@ -103,7 +75,7 @@ next_index <- function(tag, start_index, column, dp_data) {
 get_description_indices <- function(start_index, end_index, dp_data) {
   desc_indices <- which(!is.na_or_empty(dp_data[, "Description"]) &
     dp_data[, "Description"] != "<Value>")
-  desc_indices[start_index <= desc_indices & desc_indices < end_index]
+  desc_indices[start_index <= desc_indices & desc_indices <= end_index]
 }
 
 #' Get the data from the 'Data' column and onwards if present.
@@ -160,8 +132,6 @@ convert_type <- function(data) {
   }
 }
 
-
-
 #' Check whether a row contains data.
 #'
 #' A row is considered to contain data if the fields from the 'Data' column
@@ -171,7 +141,7 @@ convert_type <- function(data) {
 #' @param dp_data The dp_data to check.
 #'
 #' @keywords internal
-row_contains_data <- function(index, dp_data) {
+row_contains_data <- function(dp_data, index) {
   data_start_column <- which(colnames(dp_data) == "Data")[1]
   row_data <- dp_data[index, seq.int(data_start_column, ncol(dp_data))]
   !all(is.na_or_empty(row_data))
@@ -189,7 +159,7 @@ row_contains_data <- function(index, dp_data) {
 #' @keywords internal
 get_last_non_na_column <- function(dp_data) {
   index <- ncol(dp_data)
-  while (all(is.na_or_empty(dp_data[, index])) && index > 0) {
+  while (all(is.na_or_empty(dp_data[, seq.int(index, ncol(dp_data))])) && index > 0) {
     index <- index - 1
   }
   index
