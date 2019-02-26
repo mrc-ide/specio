@@ -39,7 +39,7 @@ get_dp_property <- function(property, dp_data) {
 #'
 #' @keywords internal
 get_data_indices <- function(property, dp_data) {
-  start_row <- which(dp_data[, "Tag"] == paste0("<", property, ">"))
+  start_row <- which(dp_data[, "Tag"] == get_full_tag(property))
   if (length(start_row) != 1) {
     stop(
       sprintf("Can't find exactly 1 property matching Tag %s, found %i.",
@@ -150,7 +150,7 @@ convert_type <- function(data) {
   } else if (class(data) == "data.frame") {
     vapply(data, function(x) {
       if (typeof(x) == "character") {
-        utils::type.convert(x)
+        utils::type.convert(x, as.is = TRUE)
       } else {
         x
       }
@@ -218,4 +218,25 @@ get_spectrum_version <- function(dp_data) {
     stop("Spectrum DP file version not recognised. Only Spectrum versions from 2016 onwards are supported.")
   }
   dp_vers
+}
+
+get_tag <- function(tags, dp_data) {
+  counter <- 0
+  final_tag <- NULL
+  while(is.null(final_tag) && counter < length(tags)) {
+    counter <- counter + 1
+    tag <- tags[counter]
+    if (get_full_tag(tag) %in% dp_data[, "Tag"]) {
+      final_tag <- tag
+    }
+  }
+  if (is.null(final_tag)) {
+    stop(sprintf("Can't find any of the tags %s within the dp data.",
+                 paste(tags, collapse = ", ")))
+  }
+  final_tag
+}
+
+get_full_tag <- function(tag) {
+  paste0("<", tag, ">")
 }

@@ -1,11 +1,10 @@
 read_hivproj_param <- function(pjnz_path) {
   dp_data <- get_dp_data(pjnz_path)
   spectrum_vers <- get_spectrum_version(dp_data)
-  tags <- get_dp_tags(spectrum_vers)
 
-  version <- get_dp_property(tags$version, dp_data)
-  valid_date <- get_dp_notes(tags$valid_date, dp_data)
-  valid_version <- get_dp_property(tags$valid_version, dp_data)
+  version <- get_tag_data("version", dp_data)
+  valid_date <- get_tag_data("valid_date", dp_data)
+  valid_version <- get_tag_data("valid_version", dp_data)
 
   ## state space dimensions
   NG <- 2
@@ -14,12 +13,29 @@ read_hivproj_param <- function(pjnz_path) {
   TS <- 3
 
   ## Projection parameters
-  yr_start <- get_dp_property(tags$yr_start, dp_data)
-  yr_end <- get_dp_property(tags$yr_end, dp_data)
+  yr_start <- get_tag_data("yr_start", dp_data)
+  yr_end <- get_tag_data("yr_end", dp_data)
   proj_years <- seq.int(yr_start, yr_end)
 
   ## scalar params
-  relinfectART <- 1.0 - get_dp_property(tags$relinfectART, dp_data)
+  relinfectART <- 1.0 - get_tag_data("relinfectART", dp_data)
 
 
+}
+
+#' Get data from full dp_data via its tag.
+#'
+#' Gets the list of tags for a particular property, identifies which one
+#' should be used and then invokes the configured function for that tag.
+#'
+#' @param property The property to get data for.
+#' @param dp_data The full dp dataset.
+#'
+#' @return The parsed data
+#' @keywords internal
+#'
+get_tag_data <- function(property, dp_data) {
+  tags <- get_property_tags(property)
+  tag <- get_tag(tags$tags, dp_data)
+  tags$func(tag, dp_data)
 }

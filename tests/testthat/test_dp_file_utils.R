@@ -113,3 +113,17 @@ testthat::test_that("Spectrum version can be found from data", {
     "Spectrum DP file version not recognised. Only Spectrum versions from 2016 onwards are supported."
   )
 })
+
+test_that("tag can be located within DP data", {
+  test_tags <- c("FirstYear MV3", "FirstYear MV2", "FirstYear MV")
+  tag <- get_tag(test_tags, dp_data)
+
+  expect_equal(tag, "FirstYear MV2")
+})
+
+test_that("tags missing from data return useful error message", {
+  test_tags <- c("MissingTag MV2", "MissingTag MV")
+
+  expect_error(get_tag(test_tags, dp_data),
+    "Can't find any of the tags MissingTag MV2, MissingTag MV within the dp data.")
+})
