@@ -114,3 +114,33 @@ test_that("tags without a function return useful error message", {
     sprintfr("Can't find a function for extracting tag data for tag FirstYear
               MV2. Fix tag configuration."))
 })
+
+test_that("all NA data returns null", {
+  dp_data <- as.data.frame(cbind(NA, NA, NA, NA, NA))
+  colnames(dp_data) <- c("Tag", "Description", "Notes", "Data", "")
+  data <- get_data(dp_data)
+
+  expect_null(data)
+})
+
+test_that("data is converted as expected", {
+  dp_data <- as.data.frame(rbind(
+    c("1", "test1", 6),
+    c("2", "test2", 7),
+    c(NA, "test3", 8)
+  ), stringsAsFactors = FALSE)
+
+  expect_error(convert_type(dp_data), "Can't convert non-numeric data.")
+
+
+  dp_data <- as.data.frame(rbind(
+    c("1", "1", 6),
+    c("2", "2", 7),
+    c(NA, "3", 8)
+  ), stringsAsFactors = FALSE)
+  converted_data <- convert_type(dp_data)
+
+  expect_type(converted_data[, 1], "double")
+  expect_type(converted_data[, 2], "double")
+  expect_type(converted_data[, 3], "double")
+})

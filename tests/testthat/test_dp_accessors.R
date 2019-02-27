@@ -1,4 +1,4 @@
-context("dp-accessors")
+context("dp_accessors")
 
 testthat::test_that("properties can be retrieved from DP file", {
   tag_data <- get_raw_tag_data("HAARTBySex MV", dp_data)

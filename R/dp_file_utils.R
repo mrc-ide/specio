@@ -1,4 +1,14 @@
-
+#' Get the raw data for a particular property within full dataset.
+#'
+#' This just finds the start an end index of the tag representing the property
+#' within the full dataset and returns the subset.
+#'
+#' @param property Property to get.
+#' @param dp_data Full set of untidied dp data.
+#'
+#' @return The subsetted data.
+#'
+#' @keywords internal
 get_raw_tag_data <- function(tag, dp_data) {
   start_row <- which(dp_data[, "Tag"] == get_tag_name(tag))
   if (length(start_row) != 1) {
@@ -14,32 +24,6 @@ get_raw_tag_data <- function(tag, dp_data) {
   ## Similarly the last row always only contains the end tag so we don't want
   ## to return this.
   dp_data[seq.int(data_start, end_row - 1), ]
-}
-
-#' Get the start and end indices of a particular property within full dataset.
-#'
-#' End index is inclusive of row containing <End> tag.
-#'
-#' @param property Property to get.
-#' @param dp_data Full set of untidied dp data.
-#'
-#' @return List contianing the start and end indices of the data.
-#'
-#' @keywords internal
-get_data_indices <- function(property, dp_data) {
-  start_row <- which(dp_data[, "Tag"] == get_tag_name(property))
-  if (length(start_row) != 1) {
-    stop(
-      sprintf(
-        "Can't find exactly 1 property matching Tag %s, found %i.",
-        property, length(start_row)
-      )
-    )
-  }
-  end_row <- next_index("<End>", start_row, "Tag", dp_data)
-
-  data_start <- next_index("<Value>", start_row, "Description", dp_data)
-  list(start = data_start, end = end_row)
 }
 
 #' Get the next index of a tag.
@@ -126,7 +110,11 @@ convert_type <- function(data) {
   } else if (class(data) == "data.frame") {
     vapply(data, function(x) {
       if (typeof(x) == "character") {
-        utils::type.convert(x, as.is = TRUE)
+        x <- utils::type.convert(x, as.is = TRUE)
+        if (typeof(x) == "character") {
+          stop("Can't convert non-numeric data frame.")
+        }
+        x
       } else {
         x
       }
