@@ -2,14 +2,18 @@
 % Please edit documentation in R/dp_accessors.R
 \name{get_fert_rat}
 \alias{get_fert_rat}
-\title{Get fertility ratio property}
+\title{Get fertility ratio property.}
 \usage{
-get_fert_rat(tag, dp_data)
+get_fert_rat(tag, tag_data, ...)
 }
-\value{
-The tidied property data.
+\arguments{
+\item{tag}{The name of the tag getting data for.}
+
+\item{tag_data}{Tag data to be parsed.}
+
+\item{...}{Other params made available by tag configuration.}
 }
 \description{
-Get fertility ratio property
+Get fertility ratio property.
 }
 \keyword{internal}

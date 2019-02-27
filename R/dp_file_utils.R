@@ -1,10 +1,12 @@
 
 get_raw_tag_data <- function(tag, dp_data) {
-  start_row <- which(dp_data[, "Tag"] == get_full_tag(tag))
+  start_row <- which(dp_data[, "Tag"] == get_tag_name(tag))
   if (length(start_row) != 1) {
     stop(
-      sprintf("Can't find exactly 1 property matching Tag %s, found %i.",
-              tag, length(start_row))
+      sprintf(
+        "Can't find exactly 1 property matching Tag %s, found %i.",
+        tag, length(start_row)
+      )
     )
   }
   end_row <- next_index("<End>", start_row, "Tag", dp_data)
@@ -25,11 +27,13 @@ get_raw_tag_data <- function(tag, dp_data) {
 #'
 #' @keywords internal
 get_data_indices <- function(property, dp_data) {
-  start_row <- which(dp_data[, "Tag"] == get_full_tag(property))
+  start_row <- which(dp_data[, "Tag"] == get_tag_name(property))
   if (length(start_row) != 1) {
     stop(
-      sprintf("Can't find exactly 1 property matching Tag %s, found %i.",
-              property, length(start_row))
+      sprintf(
+        "Can't find exactly 1 property matching Tag %s, found %i.",
+        property, length(start_row)
+      )
     )
   }
   end_row <- next_index("<End>", start_row, "Tag", dp_data)
@@ -147,6 +151,10 @@ row_contains_data <- function(dp_data, index) {
   !all(is.na_or_empty(row_data))
 }
 
+get_data_start_column <- function(dp_data) {
+  which(colnames(dp_data) == "Data")[1]
+}
+
 #' Get the column index of the last non-NA non-empty column.
 #'
 #' This locates the last non-NA non-empty column i.e. the last column which
@@ -185,7 +193,8 @@ get_spectrum_version <- function(dp_data) {
   } else if (test_tag == "<FirstYear MV2>") {
     dp_vers <- "Spectrum2017"
   } else {
-    stop("Spectrum DP file version not recognised. Only Spectrum versions from 2016 onwards are supported.")
+    stop(sprintfr("Spectrum DP file version not recognised. Only Spectrum
+                  versions from 2016 onwards are supported."))
   }
   dp_vers
 }
@@ -193,20 +202,26 @@ get_spectrum_version <- function(dp_data) {
 get_tag <- function(tags, dp_data) {
   counter <- 0
   final_tag <- NULL
-  while(is.null(final_tag) && counter < length(tags)) {
+  while (is.null(final_tag) && counter < length(tags)) {
     counter <- counter + 1
     tag <- tags[counter]
-    if (get_full_tag(tag) %in% dp_data[, "Tag"]) {
-      final_tag <- tag
+    if (get_tag_name(names(tag)) %in% dp_data[, "Tag"]) {
+      final_tag <- names(tag)
     }
   }
   if (is.null(final_tag)) {
-    stop(sprintf("Can't find any of the tags %s within the dp data.",
-                 paste(tags, collapse = ", ")))
+    stop(sprintf(
+      "Can't find any of the tags %s within the dp data.",
+      paste(names(tags), collapse = ", ")
+    ))
+  }
+  if (is.null(tags[[final_tag]]$func)) {
+    stop(sprintfr("Can't find a function for extracting tag data for tag %s.
+                   Fix tag configuration.", final_tag))
   }
   final_tag
 }
 
-get_full_tag <- function(tag) {
+get_tag_name <- function(tag) {
   paste0("<", tag, ">")
 }

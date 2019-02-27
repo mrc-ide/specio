@@ -17,6 +17,9 @@ read_hivproj_param <- function(pjnz_path) {
   yr_end <- get_property_data("yr_end", dp_data)
   proj_years <- seq.int(yr_start, yr_end)
 
+  ## Demographic inputs
+  total_population <- get_property_data("total_population", dp_data, proj_years)
+
   ## scalar params
   relinfectART <- 1.0 - get_property_data("relinfectART", dp_data)
 
@@ -34,9 +37,9 @@ read_hivproj_param <- function(pjnz_path) {
 #' @return The parsed data
 #' @keywords internal
 #'
-get_property_data <- function(property, dp_data) {
+get_property_data <- function(property, dp_data, ...) {
   tags <- get_property_tags(property)
-  tag <- get_tag(tags$tags, dp_data)
+  tag <- get_tag(tags, dp_data)
   tag_data <- get_raw_tag_data(tag, dp_data)
-  tags$func(tag_data)
+  tags[[tag]]$func(tag, tag_data, tags[[tag]], ...)
 }

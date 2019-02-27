@@ -4,10 +4,14 @@
 \alias{get_tag_data}
 \title{Get a tag from the DP file.}
 \usage{
-get_tag_data(tag_data)
+get_tag_data(tag, tag_data, ...)
 }
 \arguments{
-\item{tag_data}{Data to be tided.}
+\item{tag}{The name of the tag getting data for.}
+
+\item{tag_data}{Tag data to be parsed.}
+
+\item{...}{Other params made available calling function.}
 }
 \value{
 The tidied tag data.

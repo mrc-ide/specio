@@ -38,3 +38,11 @@ strict_list <- function(...) {
   }
   NextMethod("[[")
 }
+
+## Like sprintf but for r. Just strips any large chunks of whitespace to
+## support multiline error message strings more easily.
+sprintfr <- function(fmt, ...) {
+  sprintf(gsub("\\s+", " ", fmt), ...)
+}
+
+

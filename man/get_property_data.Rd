@@ -4,7 +4,7 @@
 \alias{get_property_data}
 \title{Get data for a property from full dp_data via its tag.}
 \usage{
-get_property_data(property, dp_data)
+get_property_data(property, dp_data, ...)
 }
 \arguments{
 \item{property}{The property to get data for.}

@@ -2,7 +2,7 @@ context("dp-accessors")
 
 testthat::test_that("properties can be retrieved from DP file", {
   tag_data <- get_raw_tag_data("HAARTBySex MV", dp_data)
-  haart_by_sex <- get_tag_data(tag_data)
+  haart_by_sex <- get_tag_data("HAARTBySex MV", tag_data)
   male_female <- c(
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 50, 200, 500, 1000, 2000, 6156,
@@ -31,19 +31,29 @@ testthat::test_that("properties can be retrieved from DP file", {
   expect_equal(as.numeric(haart_by_sex$Females), females)
 
   tag_data <- get_raw_tag_data("NumNewARTPats MV", dp_data)
-  new_art_patients <- get_tag_data(tag_data)
+  new_art_patients <- get_tag_data("NumNewARTPats MV", tag_data)
   expect_equal(rownames(new_art_patients), c("Males", "Females"))
   expect_equal(dim(new_art_patients), c(2, 56))
 })
 
 testthat::test_that("scalar properties can be retrieved", {
   tag_data <- get_raw_tag_data("VersionNum MV2", dp_data)
-  version <- get_tag_data(tag_data)
+  version <- get_tag_data("VersionNum MV2", tag_data)
   expect_equal(version, 5.1)
 })
 
 testthat::test_that("can get notes from DP data", {
   tag_data <- get_raw_tag_data("ValidDate MV", dp_data)
-  notes <- get_tag_notes(tag_data)
+  notes <- get_tag_notes("ValidDate MV", tag_data)
   expect_equal(notes, "03-20-18  11:52:25 AM")
+})
+
+testthat::test_that("total population can be retrieved", {
+  tag_data <- get_raw_tag_data("BigPop MV3", dp_data)
+  tot_pop <- get_total_population("BigPop MV3", tag_data,
+                                  list(rows = 2:163), 1970:2025)
+
+  expect_type(tot_pop, "double")
+  expect_equal(dim(tot_pop), setNames(c(81, 2, 56),
+                                      c("age", "sex", "year")))
 })

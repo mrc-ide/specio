@@ -67,15 +67,50 @@ testthat::test_that("Spectrum version can be found from data", {
 })
 
 test_that("tag can be located within DP data", {
-  test_tags <- c("FirstYear MV3", "FirstYear MV2", "FirstYear MV")
+  test_tags <- list(
+    "FirstYear MV3" = list(
+      func = print
+    ),
+    "FirstYear MV2" = list(
+      func = print
+    ),
+    "FirstYear MV" = list(
+      func = print
+    )
+  )
   tag <- get_tag(test_tags, dp_data)
 
   expect_equal(tag, "FirstYear MV2")
 })
 
 test_that("tags missing from data return useful error message", {
-  test_tags <- c("MissingTag MV2", "MissingTag MV")
+  test_tags <- list(
+    "MissingTag MV2" = list(
+      func = print
+    ),
+    "MissingTag MV" = list(
+      func = print
+    )
+  )
 
   expect_error(get_tag(test_tags, dp_data),
-    "Can't find any of the tags MissingTag MV2, MissingTag MV within the dp data.")
+    sprintfr("Can't find any of the tags MissingTag MV2, MissingTag MV within
+             the dp data."))
+})
+
+test_that("tags without a function return useful error message", {
+  test_tags <- list(
+    "FirstYear MV3" = list(
+      func = print
+    ),
+    "FirstYear MV2" = list(
+    ),
+    "FirstYear MV" = list(
+      func = print
+    )
+  )
+
+  expect_error(get_tag(test_tags, dp_data),
+    sprintfr("Can't find a function for extracting tag data for tag FirstYear
+              MV2. Fix tag configuration."))
 })
