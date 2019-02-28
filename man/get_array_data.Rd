@@ -2,20 +2,41 @@
 % Please edit documentation in R/dp_accessors.R
 \name{get_array_data}
 \alias{get_array_data}
-\title{Get the notes column for a particular property from DP data.}
+\title{Get total population property.}
 \usage{
-get_array_data(tag, tag_data, rows, cols)
+get_array_data(tag, tag_data, metadata, proj_years)
 }
 \arguments{
 \item{tag}{The name of the tag getting data for.}
 
+\item{tag_data}{Tag data to be parsed.}
+
+\item{metadata}{Metadata params made available by tag configuration.}
+
+\item{proj_years}{Years the projection is for.}
+
 \item{tag_data}{Filtered tag data.}
+
+\item{tag}{The name of the tag getting data for.}
 
 \item{tag_data}{Tag data to be parsed.}
 
-\item{...}{Other params made available calling function.}
+\item{metadata}{Metadata params made available by tag configuration. Must
+contain rows, and a func to define array dimensions and names.}
+
+\item{proj_years}{Years the projection is for.}
 }
 \description{
-Get the notes column for a particular property from DP data.
+Get total population property.
 }
+\keyword{DP}
+\keyword{Get}
+\keyword{a}
+\keyword{array}
+\keyword{data}
+\keyword{data.}
+\keyword{for}
+\keyword{from}
 \keyword{internal}
+\keyword{particular}
+\keyword{property}
