@@ -48,12 +48,70 @@ testthat::test_that("can get notes from DP data", {
   expect_equal(notes, "03-20-18  11:52:25 AM")
 })
 
-testthat::test_that("total population can be retrieved", {
+testthat::test_that("array data can be retrieved with different configs", {
   tag_data <- get_raw_tag_data("BigPop MV3", dp_data)
-  tot_pop <- get_total_population("BigPop MV3", tag_data,
-                                  list(rows = 2:163), 1970:2025)
+  total_pop_config <- list(
+    rows = 2:163,
+    type = "numeric",
+    dimensions = get_specpop_dimnames
+  )
+  tot_pop <- get_array_data("BigPop MV3", tag_data, total_pop_config, 1970:2025)
 
   expect_type(tot_pop, "double")
   expect_equal(dim(tot_pop), setNames(c(81, 2, 56),
                                       c("age", "sex", "year")))
+
+  asfr_data <- get_raw_tag_data("ASFR MV", dp_data)
+  asfr_config <- list(
+    rows = 2:8,
+    type = "numeric",
+    dimensions = get_agegr_dimnames,
+    convert_percent = TRUE
+  )
+  asfr <- get_array_data("ASFR MV", asfr_data, asfr_config, 1970:2025)
+
+  expect_type(asfr, "double")
+  expect_equal(dim(asfr), setNames(c(7, 56),
+                                      c("agegr", "year")))
+  ## Data has been converted from persisted percent.
+  expect_equal(asfr[1,1], 12.0599 / 100)
+
+  title_data <- get_raw_tag_data("FileTitle MV2", dp_data)
+  title_config <- list(
+    rows = 1,
+    cols = 4,
+    dimensions = function(x) {
+      list("test" = 1,
+           "test2" = 1)
+    }
+  )
+  title <- get_array_data("FileTitle MV2", title_data, title_config, 1970:2025)
+
+  expect_type(title, "character")
+  expect_equivalent(title, "DP FILE TITLE")
+})
+
+testthat::test_that("incomplete cfg returns a useful error", {
+  tag_data <- get_raw_tag_data("BigPop MV3", dp_data)
+  total_pop_config <- list(
+    type = "numeric",
+    dimensions = get_specpop_dimnames
+  )
+  expect_error(
+    get_array_data("BigPop MV3", tag_data, total_pop_config, 1970:2025),
+    sprintfr("Can't get array data for tag BigPop MV3. Configuration is
+             incomplete. Must specify rows and dimensions at minimum.
+             rows are null: TRUE, dimension function is null: FALSE.")
+  )
+
+  total_pop_config <- list(
+    rows = 2:163,
+    type = "numeric"
+  )
+  expect_error(
+    get_array_data("BigPop MV3", tag_data, total_pop_config, 1970:2025),
+    sprintfr("Can't get array data for tag BigPop MV3. Configuration is
+             incomplete. Must specify rows and dimensions at minimum.
+             rows are null: FALSE, dimension function is null: TRUE.")
+  )
 })

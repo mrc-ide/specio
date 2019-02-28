@@ -11,6 +11,7 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Imports:
+    beers,
     xml2
 Suggests: 
     testthat

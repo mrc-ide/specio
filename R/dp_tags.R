@@ -56,23 +56,104 @@ get_property_tags <- function(property) {
     ),
     total_population = list(
       "BigPop MV3" = list(
-        func = get_total_population,
-        rows = 2:163
+        func = get_array_data,
+        rows = 2:163,
+        type = "numeric",
+        dimensions = get_specpop_dimnames
       ),
       "BigPop MV2" = list(
-        func = get_total_population,
+        func = get_array_data,
         ## BigPop MV2 contains pop data split by sex: Male, Female, then
         ## subgrouped on region Total, Urban, Rural then one row for each age
         ## group 0 - 80. We only want to get the total data.
-        rows = c(2 + 0:80, 245 + 0:80)
+        rows = c(2 + 0:80, 245 + 0:80),
+        type = "numeric",
+        dimensions = get_specpop_dimnames
       ),
       "BigPop MV" = list(
-        func = get_total_population,
-        rows = 2:163
+        func = get_array_data,
+        rows = 2:163,
+        type = "numeric",
+        dimensions = get_specpop_dimnames
       ),
       "BigPop3" = list(
-        func = get_total_population,
-        rows = 1:162
+        func = get_array_data,
+        rows = 1:162,
+        type = "numeric",
+        dimensions = get_specpop_dimnames
+      )
+    ),
+    survey_rate = list(
+      ## Extracts Sx for age 0-79 and 80+. Spectrum caculates a separate Sx for
+      ## age 80. Population projection model in EPP-ASM needs to be updated to
+      ## handle this.
+      "SurvRate MV2" = list(
+        func = get_array_data,
+        rows = 2 + c(0:79, 81, 82 + 0:79, 82 + 81),
+        type = "numeric",
+        dimensions = get_specpop_dimnames
+      ),
+      "SurvRate MV" = list(
+        func = get_array_data,
+        rows = 2 + c(0:79, 81, 83 + 0:79, 83 + 81),
+        type = "numeric",
+        dimensions = get_specpop_dimnames
+      )
+    ),
+    ## Age-specific fertility rate by single-year
+    fertility_rate = list(
+      "TFR MV" = list(
+        func = get_tag_data
+      )
+    ),
+    asfd = list(
+      "ASFR MV" = list(
+        func = get_array_data,
+        rows = 2:8,
+        type = "numeric",
+        dimensions = get_agegr_dimnames,
+        convert_percent = TRUE
+      )
+    ),
+    sex_ratio_at_birth = list(
+      "SexBirthRatio MV" = list(
+        func = get_tag_data
+      )
+    ),
+    births = list(
+      "Births MV" = list(
+        func = get_tag_data
+      )
+    ),
+    total_net_migr = list(
+      "MigrRate MV2" = list(
+        func = get_array_data,
+        rows = c(3, 5),
+        type = "numeric",
+        dimensions = get_sex_dimnames
+      ),
+      "MigrRate MV" = list(
+        func = get_array_data,
+        rows = c(4, 7),
+        type = "numeric",
+        dimensions = get_sex_dimnames
+      )
+    ),
+    net_migr_age_dist = list(
+      ## A row for each of the 17 age groups for male and female, 34 rows total
+      "MigrAgeDist MV2" = list(
+        func = get_array_data,
+        rows = 1 + 1:34,
+        type = "numeric",
+        dimensions = get_agegr_and_sex_dimnames,
+        convert_percent = TRUE
+      ),
+      "MigrAgeDist MV" = list(
+        func = get_array_data,
+        rows = 5 + c(1:17 * 2, 37 + 1:17 * 2),
+        type = "numeric",
+        dimensions = get_agegr_and_sex_dimnames,
+        convert_percent = TRUE
       )
     ),
     fert_rat = list(

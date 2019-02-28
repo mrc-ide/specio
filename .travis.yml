@@ -4,6 +4,8 @@ language: R
 sudo: false
 cache: packages
 r_packages:
-- covr
+  - covr
+r_github_packages:
+  - vimc/beers
 after_success:
-- Rscript -e 'covr::codecov(quiet = FALSE)'
+  - Rscript -e 'covr::codecov(quiet = FALSE)'
