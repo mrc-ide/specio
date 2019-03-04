@@ -4,7 +4,7 @@
 \alias{get_property_tags}
 \title{Get tags mapping for a property.}
 \usage{
-get_property_tags(property)
+get_property_tags(property, proj_years = NULL)
 }
 \arguments{
 \item{property}{Property to get the tags for.}

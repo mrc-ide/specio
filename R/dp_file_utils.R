@@ -193,15 +193,21 @@ get_tag <- function(tags, dp_data) {
   while (is.null(final_tag) && counter < length(tags)) {
     counter <- counter + 1
     tag <- tags[counter]
-    if (get_tag_name(names(tag)) %in% dp_data[, "Tag"]) {
+    tag_name <- get_tag_name(names(tag))
+    if (tag_name != "fallback" && tag_name %in% dp_data[, "Tag"]) {
       final_tag <- names(tag)
     }
   }
   if (is.null(final_tag)) {
-    stop(sprintf(
-      "Can't find any of the tags %s within the dp data.",
-      paste(names(tags), collapse = ", ")
-    ))
+    if (!is.null(tags[["fallback"]])) {
+      final_tag <- "fallback"
+    } else {
+      stop(sprintfr(
+        "Can't find any of the tags %s within the dp data and no fallback has
+        been configured.",
+        paste(names(tags), collapse = ", ")
+      ))
+    }
   }
   if (is.null(tags[[final_tag]]$func)) {
     stop(sprintfr("Can't find a function for extracting tag data for tag %s.

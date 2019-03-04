@@ -6,13 +6,15 @@
 #' other metadata related to property required for accessing.
 #'
 #' @param property Property to get the tags for.
+#' @param proj_years Years of the projection.
 #'
 #' @return List of possible tags used to refer to the property, in order of
 #' which they should be used. Also returns the function which should be used
 #' to parse the data for the property from the full set of DP data.
 #'
 #' @keywords internal
-get_property_tags <- function(property) {
+get_property_tags <- function(property, proj_years = NULL) {
+  model_params <- get_model_params()
   mapping <- switch(
     property,
     version = list(
@@ -46,11 +48,6 @@ get_property_tags <- function(property) {
         func = get_tag_data
       ),
       "FinalYear MV" = list(
-        func = get_tag_data
-      )
-    ),
-    relinfectART = list(
-      "AdultInfectReduc MV" = list(
         func = get_tag_data
       )
     ),
@@ -156,18 +153,224 @@ get_property_tags <- function(property) {
         convert_percent = TRUE
       )
     ),
-    fert_rat = list(
-      "HIVFTR MV4" = list(
-        func = get_fert_rat
+    hiv_pop = list(
+      "HIVBySingleAge MV2" = list(
+        func = get_array_data,
+        rows = 2:163,
+        type = "numeric",
+        dimensions = get_specpop_dimnames
       ),
-      "HIVFTR MV3" = list(
-        func = get_fert_rat
+      "HIVBySingleAge MV" = list(
+        func = get_array_data,
+        rows = c(2:82, 84:164),
+        type = "numeric",
+        dimensions = get_specpop_dimnames
+      )
+    ),
+    new_infections = list(
+      "NewInfectionsBySingleAge MV" = list(
+        func = get_array_data,
+        rows = c(0:80 * 3 + 2, 0:80 * 3 + 3),
+        type = "numeric",
+        dimensions = get_specpop_dimnames
+      )
+    ),
+    art_pop = list(
+      "OnARTBySingleAge MV" = list(
+        func = get_array_data,
+        rows = c(0:80 * 3 + 2, 0:80 * 3 + 3),
+        type = "numeric",
+        dimensions = get_specpop_dimnames
+      )
+    ),
+    adult_infec_reduc = list(
+      "AdultInfectReduc MV" = list(
+        func = get_tag_data
+      )
+    ),
+    incid_pop_ages = list(
+      "EPPPopulationAges MV" = list(
+        func = get_tag_data
+      )
+    ),
+    hiv_sex_ratio = list(
+      "HIVSexRatio MV" = list(
+        func = get_tag_data
+      )
+    ),
+    dist_of_hiv = list(
+      "DistOfHIV MV2" = list(
+        func = get_array_data,
+        rows = 2:35,
+        type = "numeric",
+        dimensions = get_agegr_and_sex_dimnames
       ),
-      "HIVFTR MV2" = list(
-        func = get_fert_rat
+      "DistOfHIV MV" = list(
+        func = get_array_data,
+        rows = c(3:19, 21:37),
+        type = "numeric",
+        dimensions = get_agegr_and_sex_dimnames
+      )
+    ),
+    fertility_ratio = list(
+      "HIVTFR MV4" = list(
+        func = get_array_data,
+        rows = 1:7,
+        type = "numeric",
+        dimensions = get_agegr_dimnames
       ),
-      "HIVFTR MV" = list(
-        func = get_fert_rat
+      "HIVTFR MV3" = list(
+        func = get_array_data,
+        rows = 1:7,
+        type = "numeric",
+        dimensions = get_agegr_dimnames
+      ),
+      "HIVTFR MV2" = list(
+        func = get_array_data,
+        rows = 1:6,
+        type = "numeric",
+        ## this version of Spectrum stratified fertility reduction by
+        ## 15-17, 18-19, 20-24, ...
+        dimensions = function() {
+          list(agegr = c("15-17", "18-19", "20-24", "25-29", "30-34", "35-49"),
+               year = proj_years)
+        }
+      ),
+      "HIVTFR MV" = list(
+        func = get_array_data,
+        rows = 1:7,
+        type = "numeric",
+        dimensions = get_agegr_dimnames
+      )
+    ),
+    cd4_fertility_ratio = list(
+      "FertCD4Discount MV" = list(
+        func = get_vector_data,
+        cols = seq_len(model_params$DS) + 4,
+        type = "numeric"
+      ),
+      "fallback" = list(
+        func = function() rep(1.0, model_params$DS)
+      )
+    ),
+    women_on_art = list(
+      "RatioWomenOnART MV2" = list(
+        func = get_tag_data
+      ),
+      "RatioWomenOnART MV" = list(
+        func = get_women_on_art
+      ),
+      "fallback" = list(
+        func = function() {
+          women_on_art <- rep(1.0, model_params$fAG)
+          names(women_on_art) <- get_agegr_labels()[4:10]
+        }
+      )
+    ),
+    frr_scalar = list(
+      "FRRbyLocation MV" = list(
+        func = get_tag_data
+      ),
+      "fallback" = list(
+        func = function() 1.0
+      )
+    ),
+    new_infections_cd4 = list(
+      "AdultDistNewInfectionsCD4 MV" = list(
+        func = get_cd4_array_data,
+        rows = list(male = 2, female = 3),
+        cols = 4:31,
+        type = "numeric",
+        convert_percent = TRUE,
+        dimensions = get_cd4_dimensions
+      )
+    ),
+    mortality_cd4 = list(
+      "AdultMortByCD4NoART MV" = list(
+        func = get_cd4_array_data,
+        rows = list(male = 2, female = 3),
+        cols = 4:31,
+        type = "numeric",
+        dimensions = get_cd4_dimensions
+      )
+    ),
+    progress_cd4 = list(
+      "AdultAnnRateProgressLowerCD4 MV" = list(
+        func = get_cd4_array_data,
+        rows = list(male = 2, female = 3),
+        ## Ignore the value for final CD4 stage as we do not need for progress.
+        cols = 3 + c(seq_len(model_params$DS - 1),
+                     seq_len(model_params$DS - 1) + model_params$DS,
+                     seq_len(model_params$DS - 1) + 2 * model_params$DS,
+                     seq_len(model_params$DS - 1) + 3 * model_params$DS),
+        type = "numeric",
+        dimensions = function(x) {
+          list(
+            seq_len(model_params$DS - 1),
+            agecat = c("15-24", "25-34", "35-44", "45+")
+          )
+        }
+      )
+    ),
+    mortality_by_art_cd4_0to6 = list(
+      "AdultMortByCD4WithART0to6 MV2" = list(
+        func = get_cd4_array_data,
+        rows = list(male = 1, female = 2),
+        cols = 4:31,
+        type = "numeric",
+        dimensions = get_cd4_dimensions
+      ),
+      "AdultMortByCD4WithART0to6 MV" = list(
+        func = get_cd4_array_data,
+        rows = list(male = 2, female = 3),
+        cols = 4:31,
+        type = "numeric",
+        dimensions = get_cd4_dimensions
+      )
+    ),
+    mortality_by_art_cd4_7to12 = list(
+      "AdultMortByCD4WithART7to12 MV2" = list(
+        func = get_cd4_array_data,
+        rows = list(male = 1, female = 2),
+        cols = 4:31,
+        type = "numeric",
+        dimensions = get_cd4_dimensions
+      ),
+      "AdultMortByCD4WithART7to12 MV" = list(
+        func = get_cd4_array_data,
+        rows = list(male = 2, female = 3),
+        cols = 4:31,
+        type = "numeric",
+        dimensions = get_cd4_dimensions
+      )
+    ),
+    mortality_by_art_cd4_gt12 = list(
+      "AdultMortByCD4WithARTGt12 MV2" = list(
+        func = get_cd4_array_data,
+        rows = list(male = 1, female = 2),
+        cols = 4:31,
+        type = "numeric",
+        dimensions = get_cd4_dimensions
+      ),
+      "AdultMortByCD4WithARTGt12 MV" = list(
+        func = get_cd4_array_data,
+        rows = list(male = 2, female = 3),
+        cols = 4:31,
+        type = "numeric",
+        dimensions = get_cd4_dimensions
+      )
+    ),
+    art_mortality_rates = list(
+      "MortalityRates MV2" = list(
+        func = get_art_mortality_rates,
+        rows = 1:2
+      ),
+      "MortalityRates MV" = list(
+        func = get_art_mortality_rates,
+        rows = 1
+      ),
+      "fallback" = list(
+        func = function() get_default_art_mortality_rates(proj_years)
       )
     ),
     stop(sprintf(

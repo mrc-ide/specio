@@ -6,12 +6,6 @@ read_hivproj_param <- function(pjnz_path) {
   valid_date <- get_property_data("valid_date", dp_data)
   valid_version <- get_property_data("valid_version", dp_data)
 
-  ## state space dimensions
-  NG <- 2
-  AG <- 17
-  DS <- 7
-  TS <- 3
-
   ## Projection parameters
   yr_start <- get_property_data("yr_start", dp_data)
   yr_end <- get_property_data("yr_end", dp_data)
@@ -32,8 +26,28 @@ read_hivproj_param <- function(pjnz_path) {
     get_property_data("net_migr_age_dist", dp_data, proj_years)
   net_migration <- calc_net_migration(total_net_migr, net_migr_age_dist)
 
-  ## scalar params
-  relinfectART <- 1.0 - get_property_data("relinfectART", dp_data)
+  ## Epidemic inputs
+  hiv_pop <- get_property_data("hiv_pop", dp_data, proj_years)
+  new_infections <- get_property_data("new_infections", dp_data, proj_years)
+  art_pop <- get_property_data("art_pop", dp_data, proj_years)
+
+  ## AIM parameters
+  adult_infec_reduc <- 1.0 - get_property_data("adult_infec_reduc", dp_data)
+  incid_pop_ages <- get_property_data("incid_pop_ages", dp_data)
+  hiv_sex_ratio <- get_property_data("hiv_sex_ratio", dp_data, proj_years)
+  dist_of_hiv <- get_property_data("dist_of_hiv", dp_data, proj_years)
+
+  aim_params <- get_impact_model_params(dp_data, proj_years)
+
+  ## Natural history
+
+  new_infections <- get_property_data("new_infections_cd4", dp_data)
+  progress_cd4 <- get_property_data("progress_cd4", dp_data)
+  mortality_cd4 <- get_property_data("mortality_cd4", dp_data)
+  art_mortality_cd4 <- get_art_mortality(dp_data)
+  art_mortality_rates <- get_property_data("art_mortality_rates",
+                                           dp_data, proj_years)
+
 
   output <- list(
     valid_date = valid_date,
@@ -44,10 +58,74 @@ read_hivproj_param <- function(pjnz_path) {
     asfr = age_specific_fertility_rate,
     srb = sex_ratio_at_birth,
     births = births,
-    netmigr = net_migration
+    netmigr = net_migration,
+    hivpop = hiv_pop,
+    infections = new_infections,
+    artpop = art_pop,
+    relinfectART = adult_infec_reduc,
+    incidpopage = incid_pop_ages,
+    incrr_sex = hiv_sex_ratio,
+    incrr_age = dist_of_hiv,
+    fert_rat = aim_params$fert_rat,
+    cd4fert_rat = aim_params$cd4fert_rat,
+    ffr_art6mos = aim_params$ffr_art6mos,
+    frr_scalar = aim_params$frr_scalar,
+    cd4_initdist = new_infections,
+    cd4_prog = progress_cd4,
+    cd4_mort = mortality_cd4,
+    art_mort = art_mortality_cd4,
+    artmx_timerr = art_mortality_rates
   )
 
 
+}
+
+#' Extract AIM module parameters.
+#'
+#' @param dp_data The full set of dp data to extract data from.
+#' @param proj_years Active years for the projection.
+#'
+#' @return List of impact model params.
+#'
+#' @keywords internal
+get_impact_model_params <- function(dp_data, proj_years) {
+  fertility_ratio <- get_property_data("fertility_ratio", dp_data, proj_years)
+  cd4_fertility_ratio <- get_property_data("cd4_fertility_ratio", dp_data)
+  women_on_art <- get_property_data("women_on_art", dp_data,
+                                    get_agegr_labels()[4:10])
+  frr_scalar <- get_property_data("frr_scalar", dp_data)
+
+  output <- list(
+    fert_rat = fertility_ratio,
+    cd4fert_rat = cd4_fertility_ratio,
+    ffr_art6mos = women_on_art,
+    frr_scalar = frr_scalar
+  )
+}
+
+#' Retrieve and tidy ART mortality data.
+#'
+#' @param dp_data The full set of dp data to extract data from.
+#'
+#' @keywords internal
+get_art_mortality <- function(dp_data) {
+  mortality_0to6 <- get_property_data("mortality_by_art_cd4_0to6", dp_data)
+  mortality_7to12 <- get_property_data("mortality_by_art_cd4_7to12", dp_data)
+  mortality_gt12 <- get_property_data("mortality_by_art_cd4_gt12", dp_data)
+
+  model_params <- get_model_params()
+  art_mort <- array(NA, c(model_params$TS, model_params$DS, 4, model_params$NG),
+                    list(artdur = c("ART0MOS", "ART6MOS", "ART1YR"),
+                         cd4stage = seq_len(model_params$DS),
+                         agecat = c("15-24", "25-34", "35-44", "45+"),
+                         sex = c("male", "female")))
+  art_mort[1, , , "male"] <- mortality_0to6[, , "male"]
+  art_mort[1, , , "female"] <- mortality_0to6[, , "female"]
+  art_mort[2, , , "male"] <- mortality_7to12[, , "male"]
+  art_mort[2, , , "female"] <- mortality_7to12[, , "female"]
+  art_mort[3, , , "male"] <- mortality_gt12[, , "male"]
+  art_mort[3, , , "female"] <- mortality_gt12[, , "female"]
+  art_mort
 }
 
 #' Get data for a property from full dp_data via its tag.
@@ -62,10 +140,14 @@ read_hivproj_param <- function(pjnz_path) {
 #' @keywords internal
 #'
 get_property_data <- function(property, dp_data, ...) {
-  tags <- get_property_tags(property)
+  tags <- get_property_tags(property, ...)
   tag <- get_tag(tags, dp_data)
-  tag_data <- get_raw_tag_data(tag, dp_data)
-  tags[[tag]]$func(tag, tag_data, tags[[tag]], ...)
+  if (tag == "fallback") {
+    return(tags[[tag]]$func())
+  } else {
+    tag_data <- get_raw_tag_data(tag, dp_data)
+    return(tags[[tag]]$func(tag, tag_data, tags[[tag]], ...))
+  }
 }
 
 #' Calculate ASFR from TFR and fertility distribution.
@@ -89,6 +171,18 @@ calc_age_specific_fertility_rate <- function(fertility_rate, births_proportion){
   asfr
 }
 
+
+#' Calculate net migration for single years using beers coefficients.
+#'
+#' This uses beers coefficients to calculate net migration for a single age
+#' from data aggregated into 5 year age groups.
+#'
+#' @param total_net_migr The total net migration by 5 year age groups.
+#' @param net_migr_age_dist The net migration age distribution.
+#'
+#' @return Single year migration data.
+#'
+#' @keywords internal
 calc_net_migration <- function(total_net_migr, net_migr_age_dist){
 
   net_migr <- sweep(net_migr_age_dist, 2:3, total_net_migr, "*")

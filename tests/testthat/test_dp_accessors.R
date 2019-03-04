@@ -91,7 +91,7 @@ testthat::test_that("array data can be retrieved with different configs", {
   expect_equivalent(title, "DP FILE TITLE")
 })
 
-testthat::test_that("incomplete cfg returns a useful error", {
+testthat::test_that("incomplete array data cfg returns a useful error", {
   tag_data <- get_raw_tag_data("BigPop MV3", dp_data)
   total_pop_config <- list(
     type = "numeric",
@@ -114,4 +114,117 @@ testthat::test_that("incomplete cfg returns a useful error", {
              incomplete. Must specify rows and dimensions at minimum.
              rows are null: FALSE, dimension function is null: TRUE.")
   )
+})
+
+test_that("vector data can be retrieved", {
+  tag_data <- get_raw_tag_data("FertilityDisc MV", dp_data)
+  fert_config <- list(
+    type = "numeric",
+    cols = 5:11
+  )
+  cd4fert <- get_vector_data("FertilityDisc MV", tag_data, fert_config, NULL)
+
+  expect_equal(cd4fert, c(1.00, 0.91, 0.77, 0.57, 0.38, 0.29, 0.28))
+})
+
+test_that("incomplete vector data cfg returns a useful error", {
+  tag_data <- get_raw_tag_data("FertilityDisc MV", dp_data)
+  fert_config <- list(
+    type = "numeric"
+  )
+  expect_error(
+    get_vector_data("FertilityDisc MV", tag_data, fert_config, NULL),
+    sprintfr("Can't get vector data for tag FertilityDisc MV. Configuration
+              is incomplete. Must specify cols at a minimum.")
+  )
+})
+
+test_that("getting vector data for property with multiple rows returns error", {
+  tag_data <- get_raw_tag_data("BigPop MV3", dp_data)
+  config <- list(
+    type = "numeric",
+    cols = 2:9
+  )
+  expect_error(
+    get_vector_data("BigPop MV3", tag_data, config, NULL),
+    sprintfr("Can't get vector data for tag BigPop MV3. Must only be 1 row
+              of data for this tag to get as a vector. Got %i rows.",
+             nrow(tag_data))
+  )
+})
+
+test_that("cd4 data can be retrieved", {
+  tag_data <- get_raw_tag_data("AdultMortByCD4NoART MV", dp_data)
+  config <- list(
+    rows = list(male = 2, female = 3),
+    cols = 4:31,
+    type = "numeric",
+    dimensions = get_cd4_dimensions
+  )
+  cd4_mortality <- get_cd4_array_data("AdultMortByCD4NoART MV", tag_data,
+                                      config, NULL)
+
+  expected_mort <- c(0.005, 0.011, 0.026, 0.061, 0.139, 0.321, 0.737,
+                     0.004, 0.010, 0.026, 0.069, 0.185, 0.499, 1.342,
+                     0.005, 0.013, 0.036, 0.096, 0.258, 0.691, 1.851,
+                     0.005, 0.013, 0.032, 0.080, 0.203, 0.513, 1.295)
+  expect_equivalent(cd4_mortality, array(rep(expected_mort, 2), c(7, 4, 2)))
+  expect_equal(dimnames(cd4_mortality)$cd4stage, as.character(seq_len(7)))
+  expect_equal(dimnames(cd4_mortality)$agecat,
+               c("15-24", "25-34", "35-44", "45+"))
+  expect_equal(dimnames(cd4_mortality)$sex, c("male", "female"))
+})
+
+test_that("misconfigured cd4 cfg returns useful error", {
+  tag_data <- get_raw_tag_data("AdultMortByCD4NoART MV", dp_data)
+  config <- list(
+    rows = list(female = 3),
+    cols = 4:31,
+    type = "numeric",
+    dimensions = get_cd4_dimensions
+  )
+  expect_error(
+    get_cd4_array_data("AdultMortByCD4NoART MV", tag_data, config, NULL),
+    sprintfr("Can't get CD4 array data for tag AdultMortByCD4NoART MV.
+              Must specify rows for both male and female data."))
+})
+
+test_that("art mortality rates can be retrieved", {
+  tag_data <- get_raw_tag_data("MortalityRates MV2", dp_data)
+  cfg <- list(
+    rows = 1:2,
+    type = "numeric"
+  )
+  rates <- get_art_mortality_rates("MortalityRates MV2", tag_data, cfg, 1970:2025)
+  expect_equivalent(dim(rates), c(3, 56))
+  expect_equal(rates[1, ], rates[2, ])
+  expect_true(all(rates[1, ] != rates[3, ]))
+
+  tag_data <- get_raw_tag_data("MortalityRates MV", dp_data)
+  cfg <- list(
+    rows = 1,
+    type = "numeric"
+  )
+  rates <- get_art_mortality_rates("MortalityRates MV", tag_data, cfg, 1970:2025)
+  expect_equivalent(dim(rates), c(3, 56))
+  expect_equal(rates[1, ], rates[2, ])
+  expect_equal(rates[1, ], rates[3, ])
+
+  tag_data <- get_raw_tag_data("MortalityRates Error", dp_data)
+  cfg <- list(
+    rows = 1:3,
+    type = "numeric"
+  )
+  expect_error(
+    get_art_mortality_rates("MortalityRates Error", tag_data, cfg, 1970:2025),
+    sprintfr("Can't handle MortalityRates Error with 3 rows. Either config is
+                  misconfigured or this is a new case which needs handling."))
+
+  cfg <- list(
+    type = "numeric"
+  )
+  expect_error(
+    get_art_mortality_rates("MortalityRates MV", tag_data, cfg, 1970:2025),
+    sprintfr("Can't get art mortality rates using tag MortalityRates MV, rows
+              must be specified by configuration."))
 })
