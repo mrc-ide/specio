@@ -4,6 +4,7 @@ get_model_params <- function() {
     AG = 17,
     DS = 7,
     TS = 3,
-    fAG = 7  # fertile age groupsde
+    fAG = 7,    # fertile age groupsde
+    PAED_DS = 6 # number of paediatric stages of infection
   )
 }

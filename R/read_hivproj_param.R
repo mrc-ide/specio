@@ -66,6 +66,8 @@ read_hivproj_param <- function(pjnz_path) {
                                              proj_years)
   art_prop_alloc <- get_property_data("art_prop_alloc", dp_data, c("mx", "elig"))
   scale_cd4_mortality <- get_scale_cd4_mortality(valid_version)
+  age_14_hiv_population <- get_property_data("age_14_hiv_population", dp_data,
+                                             proj_years)
 
   output <- list(
     valid_date = valid_date,
@@ -100,8 +102,8 @@ read_hivproj_param <- function(pjnz_path) {
     artelig_specpop = art_eligibility_pop,
     art_alloc_method = art_allocation_method,
     art_prop_alloc = art_prop_alloc,
-    scale_cd4_mort = scale_cd4_mortality
-
+    scale_cd4_mort = scale_cd4_mortality,
+    age14hivpop = age_14_hiv_population
   )
 }
 
