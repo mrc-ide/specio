@@ -48,6 +48,24 @@ read_hivproj_param <- function(pjnz_path) {
   art_mortality_rates <- get_property_data("art_mortality_rates",
                                            dp_data, proj_years)
 
+  ## ART programme data
+
+  art_15plus_num_percent <- get_property_data("art_15plus_num_percent", dp_data,
+                                              proj_years)
+  art_15plus_num <- get_property_data("art_15plus_num", dp_data, proj_years)
+  art_15plus_need_art <- get_property_data("art_15plus_need_art", dp_data,
+                                           proj_years)
+  art_15plus_eligibility_threshold <-
+    get_property_data("art_15plus_eligibility_threshold", dp_data, proj_years)
+
+  art_eligibility_pop <- get_property_data("art_eligibility_pop", dp_data,
+                                           proj_years)
+  median_cd4_init <- get_property_data("median_cd4_init", dp_data, proj_years)
+  art_dropout <- get_property_data("art_dropout", dp_data, proj_years)
+  art_allocation_method <- get_property_data("art_allocation_method", dp_data,
+                                             proj_years)
+  art_prop_alloc <- get_property_data("art_prop_alloc", dp_data, c("mx", "elig"))
+  scale_cd4_mortality <- get_scale_cd4_mortality(valid_version)
 
   output <- list(
     valid_date = valid_date,
@@ -74,10 +92,17 @@ read_hivproj_param <- function(pjnz_path) {
     cd4_prog = progress_cd4,
     cd4_mort = mortality_cd4,
     art_mort = art_mortality_cd4,
-    artmx_timerr = art_mortality_rates
+    artmx_timerr = art_mortality_rates,
+    art15plus_numperc = art_15plus_num_percent,
+    art15plus_num = art_15plus_num,
+    art15plus_needart = art_15plus_need_art,
+    art15plus_eligthresh = art_15plus_eligibility_threshold,
+    artelig_specpop = art_eligibility_pop,
+    art_alloc_method = art_allocation_method,
+    art_prop_alloc = art_prop_alloc,
+    scale_cd4_mort = scale_cd4_mortality
+
   )
-
-
 }
 
 #' Extract AIM module parameters.
@@ -126,6 +151,30 @@ get_art_mortality <- function(dp_data) {
   art_mort[3, , , "male"] <- mortality_gt12[, , "male"]
   art_mort[3, , , "female"] <- mortality_gt12[, , "female"]
   art_mort
+}
+
+#' Interpret CD4 mortality scale from version number.
+#'
+#' @param valid_version The version number.
+#'
+#' @keywords internal
+get_scale_cd4_mortality <- function(valid_version) {
+  version <- valid_version
+  beta_version <- NULL
+
+  if (is.character(valid_version)) {
+    version <- as.numeric(sub("^([0-9\\.]+).*", "\\1", valid_version))
+    if (grepl("Beta", valid_version)) {
+      beta_version <- as.numeric(sub(".*Beta ([0-9]+)$", "\\1", valid_version))
+    }
+  }
+
+  if (version >= 5.73 && (beta_version >= 15 || is.null(beta_version))) {
+    scale_cd4_mortality <- 1L
+  } else {
+    scale_cd4_mortality <- 0L
+  }
+  scale_cd4_mortality
 }
 
 #' Get data for a property from full dp_data via its tag.
@@ -202,3 +251,5 @@ calc_net_migration <- function(total_net_migr, net_migr_age_dist){
   migr_data <- array(unlist(migr_data), lengths(dn), dn)
   migr_data
 }
+
+

@@ -203,6 +203,33 @@ get_women_on_art <- function(tag, tag_data, metadata, agegr_labels) {
   women_on_art
 }
 
+#' Get ART eligibility population data.
+#'
+#' @param tag The name of the tag getting data for.
+#' @param tag_data Tag data to be parsed.
+#' @param metadata Metadata params made available by tag configuration.
+#' @param agegr_labels Age group labels.
+#'
+#' @keywords internal
+get_eligibility_pop_data <- function(tag, tag_data, metadata, proj_years) {
+  if (is.null(metadata$rows) || is.null(metadata$cols)) {
+    stop(sprintfr("Can't get eligibility pop data via tag %s. Configuration is
+                  incomplete. Must specify rows and cols at minimum.
+                  rows are null: %s, cols are null: %s.",
+                  tag, is.null(metadata$rows), is.null(metadata$cols)))
+  }
+
+  data <- tag_data[metadata$rows, metadata$cols]
+  data <- stats::setNames(data, c("description", "pop", "elig", "percent", "year"))
+  data$pop <- c("PW", "TBHIV", "DC", "FSW", "MSM", "IDU", "OTHER")
+  data$elig <- as.logical(as.integer(data$elig))
+  data$percent <- as.numeric(data$percent)/100
+  data$year <- as.integer(data$year)
+  data$idx <- match(as.integer(data$year), proj_years)
+  rownames(data) <- data$pop
+  data
+}
+
 #' Get default ART mortality rates.
 #'
 #' Defaults to using 1.0 for each point.

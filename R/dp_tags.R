@@ -373,6 +373,75 @@ get_property_tags <- function(property, proj_years = NULL) {
         func = function() get_default_art_mortality_rates(proj_years)
       )
     ),
+    art_15plus_num_percent = list(
+      "HAARTBySexPerNum MV" = list(
+        func = get_array_data,
+        rows = 3:4,
+        dimensions = get_sex_dimnames,
+        type = "numeric"
+      )
+    ),
+    art_15plus_num = list(
+      "HAARTBySex MV" = list(
+        func = get_array_data,
+        rows = 3:4,
+        dimensions = get_sex_dimnames,
+        type = "numeric"
+      )
+    ),
+    art_15plus_need_art = list(
+      "NeedARTDec31 MV" = list(
+        func = get_array_data,
+        rows = 2:3,
+        dimensions = get_sex_dimnames,
+        type = "numeric"
+      )
+    ),
+    art_15plus_eligibility_threshold = list(
+      "CD4ThreshHoldAdults MV" = list(
+        func = get_tag_data
+      )
+    ),
+    art_eligibility_pop = list(
+      "PopsEligTreat MV" = list(
+        func = get_eligibility_pop_data,
+        rows = 2:8,
+        cols = 2:6
+      )
+    ),
+    median_cd4_init = list(
+      "MedCD4CountInit MV" = list(
+        func = get_tag_data
+      )
+    ),
+    art_dropout = list(
+      "PercLostFollowup MV" = list(
+        func = get_tag_data
+      )
+    ),
+    art_allocation_method = list(
+      "NewARTPatAllocationMethod MV2" = list(
+        func = get_tag_data
+      ),
+      "fallback" = list(
+        func = function() 1L
+      )
+    ),
+    art_prop_alloc = list(
+      "NewARTPatAlloc MV" = list(
+        func = get_tag_data
+      ),
+      "fallback" = list(
+        func = function() {
+          stats::setNames(c(0.5, 0.5), c("mx", "elig"))
+        }
+      )
+    ),
+    age_14_hiv_population = list(
+      "ChAged14ByCD4Cat MV" = list(
+        func = get_tag_data
+      )
+    ),
     stop(sprintf(
       "Can't get the tag names for property %s. Property missing from mapping.",
       property
