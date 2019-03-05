@@ -444,7 +444,7 @@ get_property_tags <- function(property, proj_years = NULL) {
         rows = seq_len(
           model_params$NG * model_params$PAED_DS * (4 + model_params$TS)
         ),
-        dimensions = function() {
+        dimensions = function(proj_years) {
           list(
             artstage = c("PERINAT", "BF0MOS", "BF6MOS", "BF1YR", "ART0MOS", "ART6MOS", "ART1YR"),
             cd4cat = c("CD4_1000", "CD4_750", "CD4_500", "CD4_350", "CD4_200", "CD4_0"),
