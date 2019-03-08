@@ -259,7 +259,7 @@ get_specpop_dimnames <- function(proj_years) {
 #'
 #' @keywords internal
 get_agegr_dimnames <- function(proj_years) {
-  list(agegr = get_agegr_labels()[4:10],
+  list(agegr = get_agegr_labels(between_15_49_only = TRUE),
        year = proj_years)
 }
 
@@ -280,13 +280,17 @@ get_sex_dimnames <- function(proj_years) {
 
 #' Get the age group labels.
 #'
-#' @param proj_years Vector of years the projection is for.
+#' @param between_15_49_only Whether to get age ranges between 15 and 49 only.
 #'
 #' @keywords internal
-get_agegr_labels <- function() {
-  c("0-4", "5-9", "10-14", "15-19", "20-24", "25-29", "30-34",
-    "35-39", "40-44", "45-49", "50-54", "55-59", "60-64", "65-69",
-    "70-74", "75-79", "80+")
+get_agegr_labels <- function(between_15_49_only = FALSE) {
+  age_groups <- c("0-4", "5-9", "10-14", "15-19", "20-24", "25-29", "30-34",
+                  "35-39", "40-44", "45-49", "50-54", "55-59", "60-64", "65-69",
+                  "70-74", "75-79", "80+")
+  if (between_15_49_only) {
+    age_groups <- age_groups[4:10]
+  }
+  age_groups
 }
 
 get_cd4_dimensions <- function(proj_years = NULL) {

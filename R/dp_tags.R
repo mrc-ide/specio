@@ -263,7 +263,7 @@ get_property_tags <- function(property, proj_years = NULL) {
       "fallback" = list(
         func = function() {
           women_on_art <- rep(1.0, model_params$fAG)
-          names(women_on_art) <- get_agegr_labels()[4:10]
+          names(women_on_art) <- get_agegr_labels(between_15_49_only = TRUE)
           women_on_art
         }
       )

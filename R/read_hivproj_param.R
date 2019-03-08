@@ -121,7 +121,7 @@ get_impact_model_params <- function(dp_data, proj_years) {
   fertility_ratio <- get_property_data("fertility_ratio", dp_data, proj_years)
   cd4_fertility_ratio <- get_property_data("cd4_fertility_ratio", dp_data)
   women_on_art <- get_property_data("women_on_art", dp_data,
-                                    get_agegr_labels()[4:10])
+                                    get_agegr_labels(between_15_49_only = TRUE))
   frr_scalar <- get_property_data("frr_scalar", dp_data)
 
   output <- list(
