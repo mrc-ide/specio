@@ -226,7 +226,6 @@ get_eligibility_pop_data <- function(tag, tag_data, metadata, proj_years) {
   data$percent <- as.numeric(data$percent)/100
   data$year <- as.integer(data$year)
   data$idx <- match(as.integer(data$year), proj_years)
-  rownames(data) <- data$pop
   data
 }
 
