@@ -238,45 +238,10 @@ get_eligibility_pop_data <- function(tag, tag_data, metadata, proj_years) {
 #'
 #' @keywords internal
 get_default_art_mortality_rates <- function(proj_years) {
-  dimensions <- get_art_dimensions(proj_years)
+  dimensions <- dimensions_art(proj_years)
   array(1.0, lengths(dimensions), dimensions)
 }
 
-#' Get the dimensions and names for specpop data.
-#'
-#' @param proj_years Vector of years the projection is for.
-#'
-#' @keywords internal
-get_specpop_dimnames <- function(proj_years) {
-  list(age = 0:80,
-       sex = c("male", "female"),
-       year = proj_years)
-}
-
-#' Get the dimensions and names for agegr data.
-#'
-#' @param proj_years Vector of years the projection is for.
-#'
-#' @keywords internal
-get_agegr_dimnames <- function(proj_years) {
-  list(agegr = get_agegr_labels(between_15_49_only = TRUE),
-       year = proj_years)
-}
-
-#' Get the dimensions and names for agegr, sex and proj years data.
-#'
-#' @param proj_years Vector of years the projection is for.
-#'
-#' @keywords internal
-get_agegr_and_sex_dimnames <- function(proj_years) {
-  list(agegr = get_agegr_labels(),
-       sex = c("male", "female"),
-       year = proj_years)
-}
-
-get_sex_dimnames <- function(proj_years) {
-  list(sex = c("male", "female"), year = proj_years)
-}
 
 #' Get the age group labels.
 #'
@@ -291,20 +256,5 @@ get_agegr_labels <- function(between_15_49_only = FALSE) {
     age_groups <- age_groups[4:10]
   }
   age_groups
-}
-
-get_cd4_dimensions <- function(proj_years = NULL) {
-  model_params <- get_model_params()
-  list(
-    cd4stage = seq_len(model_params$DS),
-    agecat = c("15-24", "25-34", "35-44", "45+")
-  )
-}
-
-get_art_dimensions <- function(proj_years) {
-  list(
-    artdur = c("ART0MOS", "ART6MOS", "ART1YR"),
-    year = proj_years
-  )
 }
 

@@ -24,20 +24,20 @@
 parse_array <- function(xml_node) {
   a_length <- as.integer(xml2::xml_attr(xml_node, "length"))
   a_mode <- switch(xml2::xml_attr(xml_node, "class"),
-    int = "integer",
-    double = "numeric",
-    boolean = "logical",
-    java.lang.String = "character"
+                   int = "integer",
+                   double = "numeric",
+                   boolean = "logical",
+                   java.lang.String = "character"
   )
   arr <- vector(a_mode, a_length)
 
   elem <- xml2::xml_children(xml_node)
   idx <- as.integer(xml2::xml_attr(elem, "index")) + 1L ## Java is 0-based
   convert_elem <- switch(a_mode,
-    integer = xml2::xml_integer,
-    numeric = xml2::xml_double,
-    logical = function(x) as.logical(xml2::xml_text(x)),
-    character = xml2::xml_text
+                         integer = xml2::xml_integer,
+                         numeric = xml2::xml_double,
+                         logical = function(x) as.logical(xml2::xml_text(x)),
+                         character = xml2::xml_text
   )
   arr[idx] <- convert_elem(elem)
 
