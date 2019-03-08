@@ -14,5 +14,8 @@ Imports:
     beers,
     xml2
 Suggests: 
-    testthat
+    testthat,
+    knitr,
+    rmarkdown
 RoxygenNote: 6.1.1
+VignetteBuilder: knitr
