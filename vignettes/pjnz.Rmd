@@ -64,7 +64,7 @@ The `Notes` column optionally contains information about each row of data. This 
 The `Data` column and onwards contains all of the data related to a field. It can be of many types including scalars, vectors, arrays, multi-dimensional arrays and collections of arrays. Therefore each field requires some configuration for `specio` to be able to extract the data from the file. 
 
 ### `.xml`
-The `xml` file contains a seralised Java object representing the workset. It contains surveillance and subpopulation data. Each property is contained within top level Java `epp2011.core.sets.Workset` class. 
+The `xml` file contains a seralised Java object representing the workset. It contains all data used by the Java popup when EPP is launched within Spectrum. Each property is contained within top level Java `epp2011.core.sets.Workset` class. 
 
 Note that for array properties reading the index is important as any zeros in the array are sometimes omitted from the seralised data and so we must add them back in at the appropriate indices when we read in the data from the `xml` file.
 
