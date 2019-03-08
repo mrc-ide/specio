@@ -246,7 +246,6 @@ test_that("ART eligibility population data can be retrieved", {
   expect_type(eligibility_data$year, "integer")
   expect_equal(eligibility_data$percent,
                c(0.100, 0.0168, 0.1480, 0.0070, 0.0030, 0.0001, 0.1000))
-  expect_equal(rownames(eligibility_data), eligibility_data$pop)
 
   cfg <- list(
     rows = 2:8
