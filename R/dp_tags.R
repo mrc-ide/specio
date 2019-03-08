@@ -264,6 +264,7 @@ get_property_tags <- function(property, proj_years = NULL) {
         func = function() {
           women_on_art <- rep(1.0, model_params$fAG)
           names(women_on_art) <- get_agegr_labels()[4:10]
+          women_on_art
         }
       )
     ),
