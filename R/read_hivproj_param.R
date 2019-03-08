@@ -100,6 +100,8 @@ read_hivproj_param <- function(pjnz_path) {
     art15plus_needart = art_15plus_need_art,
     art15plus_eligthresh = art_15plus_eligibility_threshold,
     artelig_specpop = art_eligibility_pop,
+    median_cd4init = median_cd4_init,
+    art_dropout = art_dropout,
     art_alloc_method = art_allocation_method,
     art_prop_alloc = art_prop_alloc,
     scale_cd4_mort = scale_cd4_mortality,
