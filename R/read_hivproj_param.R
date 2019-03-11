@@ -196,7 +196,7 @@ get_property_data <- function(property, dp_data, ...) {
   tags <- get_property_tags(property, ...)
   tag <- get_tag(tags, dp_data)
   if (tag == "fallback") {
-    return(tags[[tag]]$func())
+    return(tags[[tag]])
   } else {
     tag_data <- get_raw_tag_data(tag, dp_data)
     return(tags[[tag]]$func(tag, tag_data, tags[[tag]], ...))

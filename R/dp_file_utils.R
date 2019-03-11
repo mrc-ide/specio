@@ -209,7 +209,7 @@ get_tag <- function(tags, dp_data) {
       ))
     }
   }
-  if (is.null(tags[[final_tag]]$func)) {
+  if (final_tag != "fallback" && is.null(tags[[final_tag]]$func)) {
     stop(sprintfr("Can't find a function for extracting tag data for tag %s.
                    Fix tag configuration.", final_tag))
   }

@@ -246,9 +246,7 @@ get_property_tags <- function(property, proj_years = NULL) {
         cols = seq_len(model_params$DS) + 4,
         type = "numeric"
       ),
-      "fallback" = list(
-        func = function() rep(1.0, model_params$DS)
-      )
+      "fallback" = rep(1.0, model_params$DS)
     ),
     women_on_art = list(
       "RatioWomenOnART MV2" = list(
@@ -257,21 +255,14 @@ get_property_tags <- function(property, proj_years = NULL) {
       "RatioWomenOnART MV" = list(
         func = get_women_on_art
       ),
-      "fallback" = list(
-        func = function() {
-          women_on_art <- rep(1.0, model_params$fAG)
-          names(women_on_art) <- get_agegr_labels(between_15_49_only = TRUE)
-          women_on_art
-        }
-      )
+      "fallback" = stats::setNames(rep(1.0, model_params$fAG),
+                                   get_agegr_labels(between_15_49_only = TRUE))
     ),
     frr_scalar = list(
       "FRRbyLocation MV" = list(
         func = get_tag_data
       ),
-      "fallback" = list(
-        func = function() 1.0
-      )
+      "fallback" = 1.0
     ),
     new_infections_cd4 = list(
       "AdultDistNewInfectionsCD4 MV" = list(
@@ -362,9 +353,7 @@ get_property_tags <- function(property, proj_years = NULL) {
         func = get_art_mortality_rates,
         rows = 1
       ),
-      "fallback" = list(
-        func = function() get_default_art_mortality_rates(proj_years)
-      )
+      "fallback" = get_default_art_mortality_rates(proj_years)
     ),
     art_15plus_num_percent = list(
       "HAARTBySexPerNum MV" = list(
@@ -416,19 +405,13 @@ get_property_tags <- function(property, proj_years = NULL) {
       "NewARTPatAllocationMethod MV2" = list(
         func = get_tag_data
       ),
-      "fallback" = list(
-        func = function() 1L
-      )
+      "fallback" = 1L
     ),
     art_prop_alloc = list(
       "NewARTPatAlloc MV" = list(
         func = get_tag_data
       ),
-      "fallback" = list(
-        func = function() {
-          stats::setNames(c(0.5, 0.5), c("mx", "elig"))
-        }
-      )
+      "fallback" = stats::setNames(c(0.5, 0.5), c("mx", "elig"))
     ),
     age_14_hiv_population = list(
       "ChAged14ByCD4Cat MV" = list(

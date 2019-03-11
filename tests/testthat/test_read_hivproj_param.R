@@ -33,7 +33,7 @@ test_that("scale_cd4_mortality can be interpreted", {
   expect_equal(get_scale_cd4_mortality(version), 0L)
 })
 
-test_that("women on ART uses fallback function to return default values", {
+test_that("women on ART uses fallback to return default values", {
   women_on_art <- get_property_data("women_on_art", dp_data)
   expect_equal(
     women_on_art,
@@ -44,7 +44,7 @@ test_that("women on ART uses fallback function to return default values", {
   )
 })
 
-test_that("ART allocation uses fallback function to return default values", {
+test_that("ART allocation uses fallback to return default values", {
   art_prop_alloc <- get_property_data("art_prop_alloc", dp_data)
   expect_equal(
     art_prop_alloc,
