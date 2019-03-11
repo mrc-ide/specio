@@ -434,6 +434,9 @@ get_property_tags <- function(property, proj_years = NULL) {
       "ChAged14ByCD4Cat MV" = list(
         func = get_array_data,
         type = "numeric",
+        ## 1 row for each combination of sex, number of paediatric disease
+        ## stages (PAED_DS) and each ART treatment stage (TS) plus 4 other
+        ## stages (perinatal, breast feeding 0 months, 6 months and 1 year)
         rows = seq_len(
           model_params$NG * model_params$PAED_DS * (4 + model_params$TS)
         ),
