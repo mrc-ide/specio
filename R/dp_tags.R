@@ -56,7 +56,7 @@ get_property_tags <- function(property, proj_years = NULL) {
         func = get_array_data,
         rows = 2:163,
         type = "numeric",
-        dimensions = get_specpop_dimnames
+        dimensions = dimensions_age_sex_year
       ),
       "BigPop MV2" = list(
         func = get_array_data,
@@ -65,19 +65,19 @@ get_property_tags <- function(property, proj_years = NULL) {
         ## group 0 - 80. We only want to get the total data.
         rows = c(2 + 0:80, 245 + 0:80),
         type = "numeric",
-        dimensions = get_specpop_dimnames
+        dimensions = dimensions_age_sex_year
       ),
       "BigPop MV" = list(
         func = get_array_data,
         rows = 2:163,
         type = "numeric",
-        dimensions = get_specpop_dimnames
+        dimensions = dimensions_age_sex_year
       ),
       "BigPop3" = list(
         func = get_array_data,
         rows = 1:162,
         type = "numeric",
-        dimensions = get_specpop_dimnames
+        dimensions = dimensions_age_sex_year
       )
     ),
     survey_rate = list(
@@ -88,13 +88,13 @@ get_property_tags <- function(property, proj_years = NULL) {
         func = get_array_data,
         rows = 2 + c(0:79, 81, 82 + 0:79, 82 + 81),
         type = "numeric",
-        dimensions = get_specpop_dimnames
+        dimensions = dimensions_age_sex_year
       ),
       "SurvRate MV" = list(
         func = get_array_data,
         rows = 2 + c(0:79, 81, 83 + 0:79, 83 + 81),
         type = "numeric",
-        dimensions = get_specpop_dimnames
+        dimensions = dimensions_age_sex_year
       )
     ),
     ## Age-specific fertility rate by single-year
@@ -108,7 +108,7 @@ get_property_tags <- function(property, proj_years = NULL) {
         func = get_array_data,
         rows = 2:8,
         type = "numeric",
-        dimensions = get_agegr_dimnames,
+        dimensions = dimensions_agegr_year,
         convert_percent = TRUE
       )
     ),
@@ -127,13 +127,13 @@ get_property_tags <- function(property, proj_years = NULL) {
         func = get_array_data,
         rows = c(3, 5),
         type = "numeric",
-        dimensions = get_sex_dimnames
+        dimensions = dimensions_sex_year
       ),
       "MigrRate MV" = list(
         func = get_array_data,
         rows = c(4, 7),
         type = "numeric",
-        dimensions = get_sex_dimnames
+        dimensions = dimensions_sex_year
       )
     ),
     net_migr_age_dist = list(
@@ -142,14 +142,14 @@ get_property_tags <- function(property, proj_years = NULL) {
         func = get_array_data,
         rows = 1 + 1:34,
         type = "numeric",
-        dimensions = get_agegr_and_sex_dimnames,
+        dimensions = dimensions_agegr_sex_year,
         convert_percent = TRUE
       ),
       "MigrAgeDist MV" = list(
         func = get_array_data,
         rows = 5 + c(1:17 * 2, 37 + 1:17 * 2),
         type = "numeric",
-        dimensions = get_agegr_and_sex_dimnames,
+        dimensions = dimensions_agegr_sex_year,
         convert_percent = TRUE
       )
     ),
@@ -158,13 +158,13 @@ get_property_tags <- function(property, proj_years = NULL) {
         func = get_array_data,
         rows = 2:163,
         type = "numeric",
-        dimensions = get_specpop_dimnames
+        dimensions = dimensions_age_sex_year
       ),
       "HIVBySingleAge MV" = list(
         func = get_array_data,
         rows = c(2:82, 84:164),
         type = "numeric",
-        dimensions = get_specpop_dimnames
+        dimensions = dimensions_age_sex_year
       )
     ),
     new_infections = list(
@@ -172,7 +172,7 @@ get_property_tags <- function(property, proj_years = NULL) {
         func = get_array_data,
         rows = c(0:80 * 3 + 2, 0:80 * 3 + 3),
         type = "numeric",
-        dimensions = get_specpop_dimnames
+        dimensions = dimensions_age_sex_year
       )
     ),
     art_pop = list(
@@ -180,7 +180,7 @@ get_property_tags <- function(property, proj_years = NULL) {
         func = get_array_data,
         rows = c(0:80 * 3 + 2, 0:80 * 3 + 3),
         type = "numeric",
-        dimensions = get_specpop_dimnames
+        dimensions = dimensions_age_sex_year
       )
     ),
     adult_infec_reduc = list(
@@ -203,13 +203,13 @@ get_property_tags <- function(property, proj_years = NULL) {
         func = get_array_data,
         rows = 2:35,
         type = "numeric",
-        dimensions = get_agegr_and_sex_dimnames
+        dimensions = dimensions_agegr_sex_year
       ),
       "DistOfHIV MV" = list(
         func = get_array_data,
         rows = c(3:19, 21:37),
         type = "numeric",
-        dimensions = get_agegr_and_sex_dimnames
+        dimensions = dimensions_agegr_sex_year
       )
     ),
     fertility_ratio = list(
@@ -217,13 +217,13 @@ get_property_tags <- function(property, proj_years = NULL) {
         func = get_array_data,
         rows = 1:7,
         type = "numeric",
-        dimensions = get_agegr_dimnames
+        dimensions = dimensions_agegr_year
       ),
       "HIVTFR MV3" = list(
         func = get_array_data,
         rows = 1:7,
         type = "numeric",
-        dimensions = get_agegr_dimnames
+        dimensions = dimensions_agegr_year
       ),
       "HIVTFR MV2" = list(
         func = get_array_data,
@@ -231,16 +231,13 @@ get_property_tags <- function(property, proj_years = NULL) {
         type = "numeric",
         ## this version of Spectrum stratified fertility reduction by
         ## 15-17, 18-19, 20-24, ...
-        dimensions = function() {
-          list(agegr = c("15-17", "18-19", "20-24", "25-29", "30-34", "35-49"),
-               year = proj_years)
-        }
+        dimensions = dimensions_agegr_year_alternative
       ),
       "HIVTFR MV" = list(
         func = get_array_data,
         rows = 1:7,
         type = "numeric",
-        dimensions = get_agegr_dimnames
+        dimensions = dimensions_agegr_year
       )
     ),
     cd4_fertility_ratio = list(
@@ -249,9 +246,7 @@ get_property_tags <- function(property, proj_years = NULL) {
         cols = seq_len(model_params$DS) + 4,
         type = "numeric"
       ),
-      "fallback" = list(
-        func = function() rep(1.0, model_params$DS)
-      )
+      "fallback" = rep(1.0, model_params$DS)
     ),
     women_on_art = list(
       "RatioWomenOnART MV2" = list(
@@ -260,20 +255,14 @@ get_property_tags <- function(property, proj_years = NULL) {
       "RatioWomenOnART MV" = list(
         func = get_women_on_art
       ),
-      "fallback" = list(
-        func = function() {
-          women_on_art <- rep(1.0, model_params$fAG)
-          names(women_on_art) <- get_agegr_labels()[4:10]
-        }
-      )
+      "fallback" = stats::setNames(rep(1.0, model_params$fAG),
+                                   get_agegr_labels(between_15_49_only = TRUE))
     ),
     frr_scalar = list(
       "FRRbyLocation MV" = list(
         func = get_tag_data
       ),
-      "fallback" = list(
-        func = function() 1.0
-      )
+      "fallback" = 1.0
     ),
     new_infections_cd4 = list(
       "AdultDistNewInfectionsCD4 MV" = list(
@@ -282,7 +271,7 @@ get_property_tags <- function(property, proj_years = NULL) {
         cols = 4:31,
         type = "numeric",
         convert_percent = TRUE,
-        dimensions = get_cd4_dimensions
+        dimensions = dimensions_cd4
       )
     ),
     mortality_cd4 = list(
@@ -291,7 +280,7 @@ get_property_tags <- function(property, proj_years = NULL) {
         rows = list(male = 2, female = 3),
         cols = 4:31,
         type = "numeric",
-        dimensions = get_cd4_dimensions
+        dimensions = dimensions_cd4
       )
     ),
     progress_cd4 = list(
@@ -304,12 +293,7 @@ get_property_tags <- function(property, proj_years = NULL) {
                      seq_len(model_params$DS - 1) + 2 * model_params$DS,
                      seq_len(model_params$DS - 1) + 3 * model_params$DS),
         type = "numeric",
-        dimensions = function(x) {
-          list(
-            seq_len(model_params$DS - 1),
-            agecat = c("15-24", "25-34", "35-44", "45+")
-          )
-        }
+        dimensions = dimensions_cd4_progress
       )
     ),
     mortality_by_art_cd4_0to6 = list(
@@ -318,14 +302,14 @@ get_property_tags <- function(property, proj_years = NULL) {
         rows = list(male = 1, female = 2),
         cols = 4:31,
         type = "numeric",
-        dimensions = get_cd4_dimensions
+        dimensions = dimensions_cd4
       ),
       "AdultMortByCD4WithART0to6 MV" = list(
         func = get_cd4_array_data,
         rows = list(male = 2, female = 3),
         cols = 4:31,
         type = "numeric",
-        dimensions = get_cd4_dimensions
+        dimensions = dimensions_cd4
       )
     ),
     mortality_by_art_cd4_7to12 = list(
@@ -334,14 +318,14 @@ get_property_tags <- function(property, proj_years = NULL) {
         rows = list(male = 1, female = 2),
         cols = 4:31,
         type = "numeric",
-        dimensions = get_cd4_dimensions
+        dimensions = dimensions_cd4
       ),
       "AdultMortByCD4WithART7to12 MV" = list(
         func = get_cd4_array_data,
         rows = list(male = 2, female = 3),
         cols = 4:31,
         type = "numeric",
-        dimensions = get_cd4_dimensions
+        dimensions = dimensions_cd4
       )
     ),
     mortality_by_art_cd4_gt12 = list(
@@ -350,14 +334,14 @@ get_property_tags <- function(property, proj_years = NULL) {
         rows = list(male = 1, female = 2),
         cols = 4:31,
         type = "numeric",
-        dimensions = get_cd4_dimensions
+        dimensions = dimensions_cd4
       ),
       "AdultMortByCD4WithARTGt12 MV" = list(
         func = get_cd4_array_data,
         rows = list(male = 2, female = 3),
         cols = 4:31,
         type = "numeric",
-        dimensions = get_cd4_dimensions
+        dimensions = dimensions_cd4
       )
     ),
     art_mortality_rates = list(
@@ -369,8 +353,77 @@ get_property_tags <- function(property, proj_years = NULL) {
         func = get_art_mortality_rates,
         rows = 1
       ),
-      "fallback" = list(
-        func = function() get_default_art_mortality_rates(proj_years)
+      "fallback" = get_default_art_mortality_rates(proj_years)
+    ),
+    art_15plus_num_percent = list(
+      "HAARTBySexPerNum MV" = list(
+        func = get_array_data,
+        rows = 3:4,
+        dimensions = dimensions_sex_year,
+        type = "numeric"
+      )
+    ),
+    art_15plus_num = list(
+      "HAARTBySex MV" = list(
+        func = get_array_data,
+        rows = 3:4,
+        dimensions = dimensions_sex_year,
+        type = "numeric"
+      )
+    ),
+    art_15plus_need_art = list(
+      "NeedARTDec31 MV" = list(
+        func = get_array_data,
+        rows = 2:3,
+        dimensions = dimensions_sex_year,
+        type = "numeric"
+      )
+    ),
+    art_15plus_eligibility_threshold = list(
+      "CD4ThreshHoldAdults MV" = list(
+        func = get_tag_data
+      )
+    ),
+    art_eligibility_pop = list(
+      "PopsEligTreat MV" = list(
+        func = get_eligibility_pop_data,
+        rows = 2:8,
+        cols = 2:6
+      )
+    ),
+    median_cd4_init = list(
+      "MedCD4CountInit MV" = list(
+        func = get_tag_data
+      )
+    ),
+    art_dropout = list(
+      "PercLostFollowup MV" = list(
+        func = get_tag_data
+      )
+    ),
+    art_allocation_method = list(
+      "NewARTPatAllocationMethod MV2" = list(
+        func = get_tag_data
+      ),
+      "fallback" = 1L
+    ),
+    art_prop_alloc = list(
+      "NewARTPatAlloc MV" = list(
+        func = get_tag_data
+      ),
+      "fallback" = stats::setNames(c(0.5, 0.5), c("mx", "elig"))
+    ),
+    age_14_hiv_population = list(
+      "ChAged14ByCD4Cat MV" = list(
+        func = get_array_data,
+        type = "numeric",
+        ## 1 row for each combination of sex, number of paediatric disease
+        ## stages (PAED_DS) and each ART treatment stage (TS) plus 4 other
+        ## stages (perinatal, breast feeding 0 months, 6 months and 1 year)
+        rows = seq_len(
+          model_params$NG * model_params$PAED_DS * (4 + model_params$TS)
+        ),
+        dimensions = dimensions_age_14_hiv_population
       )
     ),
     stop(sprintf(

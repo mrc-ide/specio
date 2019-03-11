@@ -8,6 +8,8 @@ get_property_tags(property, proj_years = NULL)
 }
 \arguments{
 \item{property}{Property to get the tags for.}
+
+\item{proj_years}{Years of the projection.}
 }
 \value{
 List of possible tags used to refer to the property, in order of

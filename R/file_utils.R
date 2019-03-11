@@ -12,8 +12,8 @@
 #'
 get_filename_from_extension <- function(file_extension, path_to_zip) {
   filename <- grep(paste0("\\.", file_extension, "$"),
-    utils::unzip(path_to_zip, list = TRUE)$Name,
-    value = TRUE
+                   utils::unzip(path_to_zip, list = TRUE)$Name,
+                   value = TRUE
   )
   if (length(filename) != 1) {
     stop(sprintf(
