@@ -53,7 +53,7 @@ testthat::test_that("array data can be retrieved with different configs", {
   total_pop_config <- list(
     rows = 2:163,
     type = "numeric",
-    dimensions = get_specpop_dimnames
+    dimensions = dimensions_age_sex_year
   )
   tot_pop <- get_array_data("BigPop MV3", tag_data, total_pop_config, 1970:2025)
 
@@ -65,7 +65,7 @@ testthat::test_that("array data can be retrieved with different configs", {
   asfr_config <- list(
     rows = 2:8,
     type = "numeric",
-    dimensions = get_agegr_dimnames,
+    dimensions = dimensions_agegr_year,
     convert_percent = TRUE
   )
   asfr <- get_array_data("ASFR MV", asfr_data, asfr_config, 1970:2025)
@@ -95,7 +95,7 @@ testthat::test_that("incomplete array data cfg returns a useful error", {
   tag_data <- get_raw_tag_data("BigPop MV3", dp_data)
   total_pop_config <- list(
     type = "numeric",
-    dimensions = get_specpop_dimnames
+    dimensions = dimensions_age_sex_year
   )
   expect_error(
     get_array_data("BigPop MV3", tag_data, total_pop_config, 1970:2025),
@@ -159,7 +159,7 @@ test_that("cd4 data can be retrieved", {
     rows = list(male = 2, female = 3),
     cols = 4:31,
     type = "numeric",
-    dimensions = get_cd4_dimensions
+    dimensions = dimensions_cd4
   )
   cd4_mortality <- get_cd4_array_data("AdultMortByCD4NoART MV", tag_data,
                                       config, NULL)
@@ -181,7 +181,7 @@ test_that("misconfigured cd4 cfg returns useful error", {
     rows = list(female = 3),
     cols = 4:31,
     type = "numeric",
-    dimensions = get_cd4_dimensions
+    dimensions = dimensions_cd4
   )
   expect_error(
     get_cd4_array_data("AdultMortByCD4NoART MV", tag_data, config, NULL),

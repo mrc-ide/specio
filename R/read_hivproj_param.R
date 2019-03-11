@@ -251,7 +251,7 @@ calc_net_migration <- function(total_net_migr, net_migr_age_dist){
                                net_migr[dim(net_migr)["agegr"], , year])
   }
 
-  dn <- get_specpop_dimnames(colnames(total_net_migr))
+  dn <- dimensions_age_sex_year(colnames(total_net_migr))
   migr_data <- array(unlist(migr_data), lengths(dn), dn)
   migr_data
 }
