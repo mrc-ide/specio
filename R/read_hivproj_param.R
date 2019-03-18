@@ -193,7 +193,7 @@ get_scale_cd4_mortality <- function(valid_version) {
 #' @keywords internal
 #'
 get_property_data <- function(property, dp_data, ...) {
-  tags <- get_property_tags(property, ...)
+  tags <- get_property_tags(property)
   tag <- get_tag(tags, dp_data)
   if (tag == "fallback") {
     return(tags[[tag]])
