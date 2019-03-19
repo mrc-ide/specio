@@ -1,6 +1,6 @@
 tags <- new.env(parent = emptyenv())
 .onLoad <- function(libname, pkgname) {
-  config <- yaml::read_yaml("tag_config.yml")
+  config <- yaml::read_yaml(system.file("tag_config.yml", package = "specio"))
   tags$config <- parse_tags(config)
 }
 
