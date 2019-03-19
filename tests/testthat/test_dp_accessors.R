@@ -53,7 +53,7 @@ testthat::test_that("array data can be retrieved with different configs", {
   total_pop_config <- list(
     rows = 2:163,
     type = "numeric",
-    dimensions = get_specpop_dimnames
+    dimensions = dimensions_age_sex_year
   )
   tot_pop <- get_array_data("BigPop MV3", tag_data, total_pop_config, 1970:2025)
 
@@ -65,7 +65,7 @@ testthat::test_that("array data can be retrieved with different configs", {
   asfr_config <- list(
     rows = 2:8,
     type = "numeric",
-    dimensions = get_agegr_dimnames,
+    dimensions = dimensions_agegr_year,
     convert_percent = TRUE
   )
   asfr <- get_array_data("ASFR MV", asfr_data, asfr_config, 1970:2025)
@@ -95,7 +95,7 @@ testthat::test_that("incomplete array data cfg returns a useful error", {
   tag_data <- get_raw_tag_data("BigPop MV3", dp_data)
   total_pop_config <- list(
     type = "numeric",
-    dimensions = get_specpop_dimnames
+    dimensions = dimensions_age_sex_year
   )
   expect_error(
     get_array_data("BigPop MV3", tag_data, total_pop_config, 1970:2025),
@@ -159,7 +159,7 @@ test_that("cd4 data can be retrieved", {
     rows = list(male = 2, female = 3),
     cols = 4:31,
     type = "numeric",
-    dimensions = get_cd4_dimensions
+    dimensions = dimensions_cd4
   )
   cd4_mortality <- get_cd4_array_data("AdultMortByCD4NoART MV", tag_data,
                                       config, NULL)
@@ -181,7 +181,7 @@ test_that("misconfigured cd4 cfg returns useful error", {
     rows = list(female = 3),
     cols = 4:31,
     type = "numeric",
-    dimensions = get_cd4_dimensions
+    dimensions = dimensions_cd4
   )
   expect_error(
     get_cd4_array_data("AdultMortByCD4NoART MV", tag_data, config, NULL),
@@ -195,7 +195,8 @@ test_that("art mortality rates can be retrieved", {
     rows = 1:2,
     type = "numeric"
   )
-  rates <- get_art_mortality_rates("MortalityRates MV2", tag_data, cfg, 1970:2025)
+  rates <- get_art_mortality_rates("MortalityRates MV2", tag_data, cfg,
+                                   1970:2025)
   expect_equivalent(dim(rates), c(3, 56))
   expect_equal(rates[1, ], rates[2, ])
   expect_true(all(rates[1, ] != rates[3, ]))
@@ -205,7 +206,8 @@ test_that("art mortality rates can be retrieved", {
     rows = 1,
     type = "numeric"
   )
-  rates <- get_art_mortality_rates("MortalityRates MV", tag_data, cfg, 1970:2025)
+  rates <- get_art_mortality_rates("MortalityRates MV", tag_data, cfg,
+                                   1970:2025)
   expect_equivalent(dim(rates), c(3, 56))
   expect_equal(rates[1, ], rates[2, ])
   expect_equal(rates[1, ], rates[3, ])
@@ -227,4 +229,31 @@ test_that("art mortality rates can be retrieved", {
     get_art_mortality_rates("MortalityRates MV", tag_data, cfg, 1970:2025),
     sprintfr("Can't get art mortality rates using tag MortalityRates MV, rows
               must be specified by configuration."))
+})
+
+test_that("ART eligibility population data can be retrieved", {
+  tag_data <- get_raw_tag_data("PopsEligTreat MV", dp_data)
+  cfg <- list(
+    rows = 2:8,
+    cols = 2:6
+  )
+  eligibility_data <- get_eligibility_pop_data("PopsEligTreat MV", tag_data,
+                                               cfg, 1970:2025)
+  expect_equal(names(eligibility_data),
+               c("description", "pop", "elig", "percent", "year", "idx"))
+  expect_type(eligibility_data$elig, "logical")
+  expect_type(eligibility_data$percent, "double")
+  expect_type(eligibility_data$year, "integer")
+  expect_equal(eligibility_data$percent,
+               c(0.100, 0.0168, 0.1480, 0.0070, 0.0030, 0.0001, 0.1000))
+
+  cfg <- list(
+    rows = 2:8
+  )
+  expect_error(
+    get_eligibility_pop_data("PopsEligTreat MV", tag_data, cfg, 1970:2025),
+    sprintfr("Can't get eligibility pop data via tag PopsEligTreat MV.
+              Configuration is incomplete. Must specify rows and cols
+              at minimum. rows are null: FALSE, cols are null: TRUE.")
+  )
 })

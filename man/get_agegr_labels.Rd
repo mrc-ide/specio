@@ -4,10 +4,10 @@
 \alias{get_agegr_labels}
 \title{Get the age group labels.}
 \usage{
-get_agegr_labels()
+get_agegr_labels(between_15_49_only = FALSE)
 }
 \arguments{
-\item{proj_years}{Vector of years the projection is for.}
+\item{between_15_49_only}{Whether to get age ranges between 15 and 49 only.}
 }
 \description{
 Get the age group labels.
