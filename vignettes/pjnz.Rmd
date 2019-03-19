@@ -19,49 +19,41 @@ knitr::opts_chunk$set(
 
 [Spectrum](https://www.avenirhealth.org/software-spectrum.php) stores projection data as `PJNZ` files. These are just zips containing several files of projection data.
 
-```
-zipinfo inst/testdata/Botswana2017.PJNZ
-
-Archive:  inst/testdata/Botswana2017.PJNZ
-Zip file size: 1223077 bytes, number of entries: 15
--rw-a--     2.0 fat  1835639 b- defN 18-Jan-11 17:16 Botswana_29_05_2017 updated BF.DP
--rw-a--     2.0 fat     1827 b- defN 17-May-29 16:25 Botswana_29_05_2017 updated BF.ep1
--rw-a--     2.0 fat     1297 b- defN 17-May-29 16:25 Botswana_29_05_2017 updated BF.ep3
--rw-a--     2.0 fat    10127 b- defN 17-May-29 16:25 Botswana_29_05_2017 updated BF.ep4
--rw-a--     2.0 fat   353515 b- defN 17-May-29 16:25 Botswana_29_05_2017 updated BF.ep5
--rw-a--     2.0 fat     5379 b- defN 18-Jan-11 17:16 Botswana_29_05_2017 updated BF.PJN
--rw-a--     2.0 fat    11317 b- defN 17-May-29 11:20 Botswana_29_05_2017 updated BF.SPT
--rw-a--     2.0 fat       11 b- defN 17-May-29 16:25 Botswana_29_05_2017 updated BF.TYP
--rw-a--     2.0 fat      597 b- defN 17-May-31 11:37 Botswana_29_05_2017 updated BF.UA
--rw-a--     2.0 fat  5855535 b- defN 17-May-29 16:25 Botswana_29_05_2017 updated BF.xml
--rw-a--     2.0 fat      992 b- defN 17-May-29 11:20 Botswana_29_05_2017 updated BF_meta.csv
--rw-a--     2.0 fat    18490 b- defN 17-May-29 11:20 Botswana_29_05_2017 updated BF_surv.csv
--rw-a--     2.0 fat    58737 b- defN 17-May-29 16:25 epptmplt/epptmplt_en/Concentrated (C).wst
--rw-a--     2.0 fat    10890 b- defN 17-May-29 16:25 epptmplt/epptmplt_en/From UNAIDS Workbook.wst
--rw-a--     2.0 fat    20563 b- defN 17-May-29 16:25 epptmplt/epptmplt_en/Urban Rural (G).wst
-15 files, 8184916 bytes uncompressed, 1220831 bytes compressed:  85.1%
+```{r}
+unzip(system.file("testdata", "Botswana2018.PJNZ", package = "specio"), 
+      list = TRUE)
 ```
 
 ## Files accessed by `specio`
+
+Note that large portions of the general information about the files are taken from a write up of the Spectrum-EPP Communications between Jeff Eaton and Tim Brown in December 2016. Where this relates to `specio` this information has been updated to reflect the best of current knowledge.
+
 ### `.DP`
 The `DP` file contains demographic projection data. The data is persisted as a `csv` with a column containing tags used to identify the field.
 
 The `csv` contains 4 named columns, `Tag`, `Description`, `Notes` and `Data`. There are also an arbitrary number of extra columns all of which contain more data.
+
+```{r}
+lines <- specio:::get_dp_data(
+  system.file("testdata", "Botswana2018.PJNZ", package = "specio")
+)
+str(lines[1:10])
+```
 
 The `Tag` column contains only field tags e.g. `<BigPop MV3>` and end tags `<End>`. The field tag is used to identify the start of data related to a particular property which runs up to the next end tag. 
 
 The `Description` column can sometimes contain information about the data in the other columns but is frequently blank and is rarely used in EPP data. For each property it contains a `<Value>` tag indicating where the data in the data column begins. The data will start either on the same row as the value tag or in the row one below.
 
 For example the first 3 columns of the Botswana 2018 data for a particular field tag are
+
+```{r}
+tag <- which(lines[, "Tag"] == "<CD4ThreshHoldAdults MV>")
+lines[seq.int(tag, tag + 3), 1:7]
 ```
-<CD4ThreshHoldAdults MV>,,
-,CD4 count threshold for eligibility - Adults,
-,<Value>,
-<End>,,
-```
+
 The `Notes` column optionally contains information about each row of data. This may be things such as row names for the data or information about a group of data contained in the next few rows. When reading in EPP data, because this column is used in different ways for different fields, we tend to not read it in and instead label data via configuration.
 
-The `Data` column and onwards contains all of the data related to a field. It can be of many types including scalars, vectors, arrays, multi-dimensional arrays and collections of arrays. Therefore each field requires some configuration for `specio` to be able to extract the data from the file. 
+The `Data` column and onwards contains all of the data related to a field. It can be of many types including scalars, vectors, arrays, multi-dimensional arrays and collections of arrays. Therefore each field requires some configuration for `specio` to be able to extract the data from the file.
 
 ### `.xml`
 The `xml` file contains a seralised Java object representing the workset. It contains all data used by the Java popup when EPP is launched within Spectrum. Each property is contained within top level Java `epp2011.core.sets.Workset` class. 
@@ -122,7 +114,7 @@ Data may also be persisted as a method, we can see this for data which represent
 These can be identified by the object class `ProjectionSet` and array class `[D` or `[I` meaning array of double or int arrays respectively.
 
 ### `.SPT` - EPP results for Spectrum
-Returns the results of the national epidemic to Spectrum. The `SPT` file is the primary file for sending the results of EPPs fitting back to Spectrum. The file contains 6 or more sections each of which is delimited by either single `=` or two `==`. It has the following overall structure:
+Returns the results of the national epidemic to Spectrum. The `SPT` file is the primary file for sending the results of EPPs fitting back to Spectrum. The file contains 6 or more sections each of which is delimited by either single a `=` or two `==`. It has the following overall structure:
 
 #### Section 1: National results
 Lines after the line containing the keyword `BASEYEAR` through to the delimiter `=`, the end of the projection indicator.
@@ -247,6 +239,7 @@ Note that this is missing from the example above as it has been removed manually
 The `SPU` file contains uncertainty results for the national epidemic.
 
 The purpose of the `SPU` file is to pass the resamples done during the IMIS process to Spectrum for use in its own uncertainty calculations. Normally, 3000 resamples are done. The `SPU` file passes first the overall national Bayesian medians followed by the number of unique national resamples. Because a particular resample may get selected multiple times, each resample is also provided with a COUNT of the number of times it was resampled, followed by a series of lines containing the prevalence and incidence each year in the format:
+
 * Year, prevalence_value, incidence_value
 
 An annotated description of the format is as follows:
@@ -276,3 +269,95 @@ COUNT 5.0               // Number of times following series was resampled
 …                       // this continues until all unique curves in the 3,000 
                         // resamples are specified. COUNTs will sum to 3,000
 ```
+
+## Files not currently accessed by `specio`
+
+As seen above the `PJNZ` file contains several other files other than those read in by `specio`. Where information about these files is known it is included below. This information is taken from a document written by Tim Brown in 2016, some of this may be out of date so should not be considered the source of truth for details about how these files are used.
+
+### `ep1` - year and demographic inputs that EPP needs from Spectrum
+
+The `ep1` file provides the essential information EPP needs to set up the epidemic projection and calculate parameters derived from the demographics to ensure Spectrum-EPP consistency on populations over time. In the absence of HIV, this data is used by EPP to exactly reproduce the Spectrum populations for each year. This information includes:
+
+* Country name and UN country code
+* First and final year of the epidemic projection to be run (NOTE: this is not the start year of the epidemic, but the start year of the projection period)
+* Excess mortality among IDUs
+* An age range indicator, AGERANGE, specifying whether Spectrum is passing population numbers for 15-49 year olds or 15 and older. If AGERANGE is 15-49, then all population values refer to 15-49 year olds. If AGERANGE is 15+ then they refer to the population 15 and older.
+* Annual population numbers, including 15-49 or 15+ population, number of 15 year olds, number of 50 year olds (set to zero if using 15+ population), and net migration for either 15-49 year olds or for 15+ in each year from projection start year to projection end year.
+
+NOTE: in the following file specifications, words entered all in CAPS are keywords to be used to easily identify the information contained on that line or in that section of the file. All population numbers are entered as integers. All values are separated by commas, so no extraneous commas should occur in country names or in projection names.
+
+Each population line consists of five numbers separated by commas:
+
+```
+Year, 15-49_or 15+_population, 15 year olds, 50 year olds, net_migration_15-49_or_15+
+```
+
+Population values will be provided for the full epidemiological projection period, from the projection start year to the projection end year.
+
+The format for the `ep1` file is as follows
+
+```
+                                              //Same as the invoking argument for 
+                                              //country name (may have blanks but
+COUNTRY,country name,country code             //no commas), country code is UN code
+PROJNAME,“C:\Users\tim\DATA\proj_name.PJN”    //Same as invoking argument(fully
+                                              //qualified filename for base proj file)
+FIRSTPROJYR,1970                            //First year of the epidemiological projection
+LASTPROJYR,2016                             //Last year of epidemiological projection
+IDUMORT,1.07                                //Excess IDU mortality in percent per year
+AGERANGE 15-49                              //The age range surveillance data addresses
+POPSTART                                    //Start of the non-AIDS population projection
+1970,3459875,148280,98854,34589
+1971,3632868,155694,103796,35281
+1972,3814512,163479,108986,35986
+1973,4005237,171653,114435,36706
+1974,4205499,180236,120157,37440
+1975,4415774,189247,126165,38189
+...
+2012,8900434,381447,254298,65234
+2013,8989438,385262,256841,65886
+2014,9079332,389114,259410,66545
+2015,9170126,393005,262004,67211
+2016,9261827,396935,264624,67883
+POPEND
+```
+
+For example, here are the first few lines from the file for Peru:
+
+```
+COUNTRY,Peru,604
+PROJNAME,C:\Users\Tim Brown\AppData\Roaming\Futures Institute\Spectrum\Temp\Peru 2015 FinalPJNZ~BC99.tmp\Peru 2015 Final.PJN
+FIRSTPROJYR,1970
+LASTPROJYR,2021
+IDUMORT,1.07
+AGERANGE 15-49
+POPSTART
+1970,5928014,291589,83621,0
+1971,6117343,300730,86139,0
+1972,6314019,310432,88774,0
+1973,6518406,320827,91641,0
+1974,6731110,332084,94737,0
+1975,6949523,343962,98008,-3022
+1976,7175224,356148,101368,-4632
+1977,7408225,368362,104835,-6078
+```
+
+### `typ` - type of the EPP workset either `GENERALIZED` or `CONCENTRATED`
+
+File is used to communicate epidemic type back to Spectrum. It consists of a single line containing either
+`GENERALIZED` or `CONCENTRATED` depending on type selected by user.
+
+### `ep4` - ART data and parameters
+
+The `ep4` file provides the information about antiretroviral therapy using the CD4 compartment model adopted in Spectrum. This includes the following parameters (with associated keywords indicated in parentheses):
+
+* CD4 lower limits (`CD4LOWLIMITS`): the lower CD4 limit for each of the CD4 compartments in the model
+* Lambda (`LAMBDA`): the progression rate through the CD4 compartments
+* Distribution of new infections (`NEWINFECTSCD4`): the percent of new infections going into each of the CD4 compartments
+* Mortality when not on ART (`MU`): the annual mortality of those not on ART
+* Mortality on ART (`ALPHA1`, `ALPHA2` and `ALPHA3`): the annual mortality for those on ART for the 1st 6 months, 2nd 6 months and for more than one year
+* Infectivity reduction (`INFECTREDUC`): the percent by which the person’s risk of infecting another is reduced by being on ART.
+* Art coverage specified as number or percent (`ARTSTART`/`ARTEND`).
+
+In addition, this file contains information on the number of HIV-positive 15 year olds entering the 15-49 or 15+ population and the number of HIV-positive 50 years olds leaving the 15-49 population, disaggregated by on ART (`HIVPOS_15YEAROLDS`, `HIVPOS_50YEAROLDS`) and not on ART (`HIVPOS_15YEAROLDSART`, `HIVPOS_50YEAROLDSART`). For 15 year olds a CD4 distribution is provided for both on ART and off ART groups , while 50 year olds are assumed to have the same CD4 distribution as the population as a whole. The file also contains indicators for special populations (`SPECPOP`), the type of ART coverage (`ARTCOVERAGE`: `MALE_FEMALE`, `CD4_PERCENT`, `CD4_NUMBER`) and data on dropout rates (`ARTDROPOUTRATE`) and CD4 medians at initiation (`CD4MEDIAN`).
+
