@@ -207,7 +207,7 @@ cd4_fertility_ratio:
     cols: seq_len(DS) + 4
     type: "numeric"
   "fallback":
-    rep(1.0, DS)
+    function(...) rep(1.0, DS)
 
 women_on_art:
   "RatioWomenOnART MV2":
@@ -215,14 +215,16 @@ women_on_art:
   "RatioWomenOnArt MV":
     func: get_women_on_art
   "fallback":
-    stats::setNames(rep(1.0, fAG),
-                    get_agegr_labels(between_15_49_only = TRUE))
+    function(...) {
+      stats::setNames(rep(1.0, fAG),
+                      get_agegr_labels(between_15_49_only = TRUE))
+    }
 
 frr_scalar:
   "FRRbyLocation MV":
     func: get_tag_data
   "fallback":
-    1.0
+    function(...) 1.0
 
 new_infections_cd4:
   "AdultDistNewInfectionsCD4 MV":
@@ -302,8 +304,8 @@ art_mortality_rates:
   "MortalityRates MV":
     func: get_art_mortality_rates
     rows: 1
-#  "fallback":
-#    get_default_art_mortality_rates(proj_years)
+  "fallback":
+    get_default_art_mortality_rates
 
 art_15plus_num_percent:
   "HAARTBySexPerNum MV":
@@ -348,13 +350,13 @@ art_allocation_method:
   "NewARTPatAllocationMethod MV2":
     func: get_tag_data
   "fallback":
-    1L
+    function(...) 1L
 
 art_prop_alloc:
   "NewARTPatAlloc MV":
     func: get_tag_data
   "fallback":
-    stats::setNames(c(0.5, 0.5), c("mx", "elig"))
+    function(...) stats::setNames(c(0.5, 0.5), c("mx", "elig"))
 
 age_14_hiv_population:
   "ChAged14ByCD4Cat MV":
