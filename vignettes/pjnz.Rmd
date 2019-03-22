@@ -33,11 +33,11 @@ The `DP` file contains demographic projection data. The data is persisted as a `
 
 The `csv` contains 4 named columns, `Tag`, `Description`, `Notes` and `Data`. There are also an arbitrary number of extra columns all of which contain more data.
 
-```{r}
-lines <- specio:::get_dp_data(
+```{r, echo = FALSE}
+data <- specio:::get_dp_data(
   system.file("testdata", "Botswana2018.PJNZ", package = "specio")
 )
-str(lines[1:10])
+str(data[1:10])
 ```
 
 The `Tag` column contains only field tags e.g. `<BigPop MV3>` and end tags `<End>`. The field tag is used to identify the start of data related to a particular property which runs up to the next end tag. 
@@ -46,9 +46,9 @@ The `Description` column can sometimes contain information about the data in the
 
 For example the first 3 columns of the Botswana 2018 data for a particular field tag are
 
-```{r}
-tag <- which(lines[, "Tag"] == "<CD4ThreshHoldAdults MV>")
-lines[seq.int(tag, tag + 3), 1:7]
+```{r, echo = FALSE}
+tag <- which(data[, "Tag"] == "<CD4ThreshHoldAdults MV>")
+data[seq.int(tag, tag + 3), 1:7]
 ```
 
 The `Notes` column optionally contains information about each row of data. This may be things such as row names for the data or information about a group of data contained in the next few rows. When reading in EPP data, because this column is used in different ways for different fields, we tend to not read it in and instead label data via configuration.
