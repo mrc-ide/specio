@@ -198,7 +198,7 @@ get_art_mortality_rates <- function(tag, tag_data, metadata, proj_years) {
 #'
 #' @keywords internal
 get_women_on_art <- function(tag, tag_data, metadata, agegr_labels) {
-  women_on_art <- rep(get_tag_data(tag, tag_data, NULL), get_model_params()$fAG)
+  women_on_art <- rep(get_tag_data(tag, tag_data, NULL), cfg$params$fAG)
   names(women_on_art) <- agegr_labels
   women_on_art
 }

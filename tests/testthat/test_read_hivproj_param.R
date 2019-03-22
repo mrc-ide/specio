@@ -19,7 +19,7 @@ test_that("get_property_data gets the correct data", {
 
 test_that("get_property_data can use a fallback function", {
   prop <- get_property_data("cd4_fertility_ratio", dp_data)
-  expect_equal(prop, rep(1.0, get_model_params()$DS))
+  expect_equal(prop, rep(1.0, cfg$params$DS))
 })
 
 test_that("scale_cd4_mortality can be interpreted", {

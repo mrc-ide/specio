@@ -14,12 +14,12 @@
 #'
 #' @keywords internal
 get_property_tags <- function(property) {
-  if (is.null(tags$config[[property]])) {
+  if (is.null(cfg$tags[[property]])) {
     stop(sprintf(
       "Can't get the tag names for property %s. Property missing from mapping.",
       property
     ))
   }
-  tags$config[[property]]
+  cfg$tags[[property]]
 }
 

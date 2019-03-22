@@ -1,29 +1,41 @@
-tags <- new.env(parent = emptyenv())
+cfg <- new.env(parent = emptyenv())
 .onLoad <- function(libname, pkgname) {
-  config <- yaml::read_yaml(system.file("tag_config.yml", package = "specio"))
-  tags$config <- parse_tags(config)
+  config <- yaml::read_yaml(system.file("config.yml", package = "specio"))
+  config <- parse_config(config)
+  cfg$tags <- config$tags
+  cfg$params <- config$params
 }
 
 
-parse_tags <- function(config) {
-  for (name in names(config)) {
-    config <- parse_tag(name, config)
+parse_config <- function(config) {
+  constants <- config$.environment
+  envir <- list2env(constants, parent = environment())
+  config$.environment <- NULL
+
+  # for (name in names(config)) {
+  #   config[[nms]]$name <- name
+  # }
+
+
+  for (name in setdiff(names(config), ".environment")) {
+    config <- parse_tag(name, config, envir)
   }
-  config
+
+  list(tags = config, params = constants)
 }
 
-parse_tag <- function(name, config) {
+parse_tag <- function(name, config, envir) {
   for (tag in names(config[[name]])) {
-    config <- parse_function(tag, name, config, "func")
+    config <- parse_function(tag, name, config, envir, "func")
     if (tag != "fallback") {
-      config <- parse_function(tag, name, config, "dimensions", FALSE)
-      config <- parse_rows_and_cols(tag, name, config)
+      config <- parse_function(tag, name, config, envir, "dimensions", FALSE)
+      config <- parse_rows_and_cols(tag, name, config, envir)
     }
   }
   config
 }
 
-parse_function <- function(tag_name, property_name, config,
+parse_function <- function(tag_name, property_name, config, envir,
                            func_field_name = "func", required = TRUE) {
   if (tag_name != "fallback") {
     func_name <- config[[property_name]][[tag_name]][[func_field_name]]
@@ -45,25 +57,23 @@ parse_function <- function(tag_name, property_name, config,
     }
   } else {
     config[[property_name]][[tag_name]] <-
-      eval_with_params(config[[property_name]][[tag_name]])
+      eval_with_params(config[[property_name]][[tag_name]], envir)
   }
   config
 }
 
-parse_rows_and_cols <- function(tag_name, property_name, config) {
+parse_rows_and_cols <- function(tag_name, property_name, config, envir) {
   if (!is.null(config[[property_name]][[tag_name]]$rows)) {
     config[[property_name]][[tag_name]]$rows <-
-      eval_with_params(config[[property_name]][[tag_name]]$rows)
+      eval_with_params(config[[property_name]][[tag_name]]$rows, envir)
   }
   if (!is.null(config[[property_name]][[tag_name]]$cols)) {
     config[[property_name]][[tag_name]]$cols <-
-      eval_with_params(config[[property_name]][[tag_name]]$cols)
+      eval_with_params(config[[property_name]][[tag_name]]$cols, envir)
   }
   config
 }
 
-eval_with_params <- function(text) {
-  params <- environment()
-  params$model_params <- get_model_params()
-  eval(parse(text = text), envir = params)
+eval_with_params <- function(text, envir) {
+  eval(parse(text = text), envir = envir)
 }
