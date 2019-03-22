@@ -1,5 +1,5 @@
 cfg <- new.env(parent = emptyenv())
-.onLoad <- function(libname, pkgname) {
+.onLoad <- function(...) {
   config <- yaml::read_yaml(system.file("config.yml", package = "specio"))
   config <- parse_config(config)
   cfg$tags <- config$tags
@@ -11,11 +11,6 @@ parse_config <- function(config) {
   constants <- config$.environment
   envir <- list2env(constants, parent = environment())
   config$.environment <- NULL
-
-  # for (name in names(config)) {
-  #   config[[nms]]$name <- name
-  # }
-
 
   for (name in setdiff(names(config), ".environment")) {
     config <- parse_tag(name, config, envir)
