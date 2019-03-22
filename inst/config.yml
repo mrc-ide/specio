@@ -214,7 +214,7 @@ women_on_art:
     func: get_tag_data
   "RatioWomenOnArt MV":
     func: get_women_on_art
-  "fallback":
+  "fallback": |-
     function(...) {
       stats::setNames(rep(1.0, fAG),
                       get_agegr_labels(between_15_49_only = TRUE))
@@ -248,10 +248,11 @@ progress_cd4:
     func: get_cd4_array_data
     rows: list(male = 2, female = 3)
     ## Ignore the value for final CD4 stage as we do not need for progress.
-    cols: 3 + c(seq_len(DS - 1),
-                seq_len(DS - 1) + DS,
-                seq_len(DS - 1) + 2 * DS,
-                seq_len(DS - 1) + 3 * DS)
+    cols: |-
+      3 + c(seq_len(DS - 1),
+      seq_len(DS - 1) + DS,
+      seq_len(DS - 1) + 2 * DS,
+      seq_len(DS - 1) + 3 * DS)
     type: "numeric"
     dimensions: dimensions_cd4_progress
 
