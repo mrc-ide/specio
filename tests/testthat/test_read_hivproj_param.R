@@ -19,7 +19,7 @@ test_that("get_property_data gets the correct data", {
 
 test_that("get_property_data can use a fallback function", {
   prop <- get_property_data("cd4_fertility_ratio", dp_data)
-  expect_equal(prop, rep(1.0, get_model_params()$DS))
+  expect_equal(prop, rep(1.0, cfg$params$DS))
 })
 
 test_that("scale_cd4_mortality can be interpreted", {
@@ -53,4 +53,10 @@ test_that("ART allocation uses fallback to return default values", {
       c("mx", "elig")
     )
   )
+})
+
+test_that("params are available to fallback functions", {
+  proj_years <- 2010:2018
+  art_mort <- get_property_data("art_mortality_rates", dp_data_2016, proj_years)
+  expect_equivalent(ncol(art_mort), length(proj_years))
 })

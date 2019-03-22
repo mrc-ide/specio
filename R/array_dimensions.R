@@ -4,9 +4,8 @@
 #'
 #' @keywords internal
 dimensions_cd4 <- function(proj_years = NULL) {
-  model_params <- get_model_params()
   list(
-    cd4stage = seq_len(model_params$DS),
+    cd4stage = seq_len(cfg$params$DS),
     agecat = dimesions_cd4_agecat()
   )
 }
@@ -19,9 +18,8 @@ dimensions_cd4 <- function(proj_years = NULL) {
 #'
 #' @keywords internal
 dimensions_cd4_progress <- function(proj_years) {
-  model_params <- get_model_params()
   list(
-    cd4stage = seq_len(model_params$DS - 1),
+    cd4stage = seq_len(cfg$params$DS - 1),
     agecat = dimesions_cd4_agecat()
   )
 }

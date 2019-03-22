@@ -1,0 +1,373 @@
+".environment":
+  ## Number of sexes (male, female)
+  NG: 2
+  ## Number of age groups (5 year groups from 0-4, ..., 75-79, 80+)
+  AG: 17
+  ## Number of disease stages (CD4 count stages: >500, 350-499,
+  ## 250-349, 200-249, 100-199, 50-99, <5)
+  DS: 7
+  ## Number of treatment stages (<6 months, 6-12 months, >1 year)
+  TS: 3
+  ## Number of age groups for fertility (15-19, 20-24, ..., 45-49)
+  fAG: 7
+  ## Number of disease stages for paediatric HIV infection
+  PAED_DS: 6
+
+version:
+  "VersionNum MV2":
+    func: get_tag_data
+  "VersionNum MV1":
+    func: get_tag_data
+
+valid_date:
+  "ValidDate MV":
+    func: get_tag_notes
+
+valid_version:
+  "ValidVers MV":
+    func: get_tag_data
+
+yr_start:
+  "FirstYear MV2":
+    func: get_tag_data
+  "FirstYear MV":
+    func: get_tag_data
+
+yr_end:
+  "FinalYear MV2":
+    func: get_tag_data
+  "FinalYear MV":
+    func: get_tag_data
+
+total_population:
+  "BigPop MV3":
+    func: get_array_data
+    rows: 2:163
+    type: "numeric"
+    dimensions: dimensions_age_sex_year
+  "BigPop MV2":
+    func: get_array_data
+    ## BigPop MV2 contains pop data split by sex: Male, Female, then
+    ## subgrouped on region Total, Urban, Rural then one row for each age
+    ## group 0 - 80. We only want to get the total data.
+    rows: c(2 + 0:80, 245 + 0:80)
+    type: "numeric"
+    dimensions: dimensions_age_sex_year
+  "BigPop MV":
+    func: get_array_data
+    rows: 2:163
+    type: "numeric"
+    dimensions: dimensions_age_sex_year
+  "BigPop3":
+    func: get_array_data
+    rows: 1:162
+    type: "numeric"
+    dimensions: dimensions_age_sex_year
+
+survey_rate:
+  ## Extracts Sx for age 0-79 and 80+. Spectrum caculates a separate Sx for
+  ## age 80. Population projection model in EPP-ASM needs to be updated to
+  ## handle this.
+  "SurvRate MV2":
+    func: get_array_data
+    rows: 2 + c(0:79, 81, 82 + 0:79, 82 + 81)
+    type: "numeric"
+    dimensions: dimensions_age_sex_year
+  "SurvRate MV":
+    func: get_array_data
+    rows: 2 + c(0:79, 81, 83 + 0:79, 83 + 81)
+    type: "numeric"
+    dimensions: dimensions_age_sex_year
+
+## Age-specific fertility rate by single-year
+fertility_rate:
+  "TFR MV":
+    func: get_tag_data
+
+asfd:
+  "ASFR MV":
+    func: get_array_data
+    rows: 2:8
+    type: "numeric"
+    dimensions: dimensions_agegr_year
+    convert_percent: TRUE
+
+sex_ratio_at_birth:
+  "SexBirthRatio MV":
+    func: get_tag_data
+
+births:
+  "Births MV":
+    func: get_tag_data
+
+total_net_migr:
+  "MigrRate MV2":
+    func: get_array_data
+    rows: c(3, 5)
+    type: "numeric"
+    dimensions: dimensions_sex_year
+  "MigrRate MV":
+    func: get_array_data
+    rows: c(4, 7)
+    type: "numeric"
+    dimensions: dimensions_sex_year
+
+net_migr_age_dist:
+  ## A row for each of the 17 age groups for male and female, 34 rows total
+  "MigrAgeDist MV2":
+    func: get_array_data
+    rows: 1 + 1:34
+    type: "numeric"
+    dimensions: dimensions_agegr_sex_year
+    convert_percent: TRUE
+  "MigrAgeDist MV":
+    func: get_array_data
+    rows: 5 + c(1:17 * 2, 37 + 1:17 * 2)
+    type: "numeric"
+    dimensions: dimensions_agegr_sex_year
+    convert_percent: TRUE
+
+hiv_pop:
+  "HIVBySingleAge MV2":
+    func: get_array_data
+    rows: 2:163
+    type: "numeric"
+    dimensions: dimensions_age_sex_year
+  "HIVBySingleAge MV":
+    func: get_array_data
+    rows: c(2:82, 84:164)
+    type: "numeric"
+    dimensions: dimensions_age_sex_year
+
+new_infections:
+  "NewInfectionsBySingleAge MV":
+    func: get_array_data
+    rows: c(0:80 * 3 + 2, 0:80 * 3 + 3)
+    type: "numeric"
+    dimensions: dimensions_age_sex_year
+
+art_pop:
+  "OnARTBySingleAge MV":
+    func: get_array_data
+    rows: c(0:80 * 3 + 2, 0:80 * 3 + 3)
+    type: "numeric"
+    dimensions: dimensions_age_sex_year
+
+adult_infec_reduc:
+  "AdultInfectReduc MV":
+    func: get_tag_data
+
+incid_pop_ages:
+  "EPPPopulationAges MV":
+    func: get_tag_data
+
+hiv_sex_ratio:
+  "HIVSexRatio MV":
+    func: get_tag_data
+
+dist_of_hiv:
+  "DistOfHIV MV2":
+    func: get_array_data
+    rows: 2:35
+    type: "numeric"
+    dimensions: dimensions_agegr_sex_year
+  "DistOfHIV MV":
+    func: get_array_data
+    rows: c(3:19, 21:37)
+    type: "numeric"
+    dimensions: dimensions_agegr_sex_year
+
+fertility_ratio:
+  "HIVTFR MV4":
+    func: get_array_data
+    rows: 1:7
+    type: "numeric"
+    dimensions: dimensions_agegr_year
+  "HIVTFR MV3":
+    func: get_array_data
+    rows: 1:7
+    type: "numeric"
+    dimensions: dimensions_agegr_year
+  "HIVTFR MV2":
+    func: get_array_data
+    rows: 1:6
+    type: "numeric"
+    ## this version of Spectrum stratified fertility reduction by
+    ## 15-17, 18-19, 20-24, ...
+    dimensions: dimensions_agegr_year_alternative
+  "HIVTFR MV":
+    func: get_array_data
+    rows: 1:7
+    type: "numeric"
+    dimensions: dimensions_agegr_year
+
+cd4_fertility_ratio:
+  "FertCD4Discount MV":
+    func: get_vector_data
+    cols: seq_len(DS) + 4
+    type: "numeric"
+  "fallback":
+    function(...) rep(1.0, DS)
+
+women_on_art:
+  "RatioWomenOnART MV2":
+    func: get_tag_data
+  "RatioWomenOnArt MV":
+    func: get_women_on_art
+  "fallback": |-
+    function(...) {
+      stats::setNames(rep(1.0, fAG),
+                      get_agegr_labels(between_15_49_only = TRUE))
+    }
+
+frr_scalar:
+  "FRRbyLocation MV":
+    func: get_tag_data
+  "fallback":
+    function(...) 1.0
+
+new_infections_cd4:
+  "AdultDistNewInfectionsCD4 MV":
+    func: get_cd4_array_data
+    rows: list(male = 2, female = 3)
+    cols: 4:31
+    type: "numeric"
+    convert_percent: TRUE
+    dimensions: dimensions_cd4
+
+mortality_cd4:
+  "AdultMortByCD4NoART MV":
+    func: get_cd4_array_data
+    rows: list(male = 2, female = 3)
+    cols: 4:31
+    type: "numeric"
+    dimensions: dimensions_cd4
+
+progress_cd4:
+  "AdultAnnRateProgressLowerCD4 MV":
+    func: get_cd4_array_data
+    rows: list(male = 2, female = 3)
+    ## Ignore the value for final CD4 stage as we do not need for progress.
+    cols: |-
+      3 + c(seq_len(DS - 1),
+      seq_len(DS - 1) + DS,
+      seq_len(DS - 1) + 2 * DS,
+      seq_len(DS - 1) + 3 * DS)
+    type: "numeric"
+    dimensions: dimensions_cd4_progress
+
+mortality_by_art_cd4_0to6:
+  "AdultMortByCD4WithART0to6 MV2":
+    func: get_cd4_array_data
+    rows: list(male = 1, female = 2)
+    cols: 4:31
+    type: "numeric"
+    dimensions: dimensions_cd4
+  "AdultMortByCD4WithART0to6 MV":
+    func: get_cd4_array_data
+    rows: list(male = 2, female = 3)
+    cols: 4:31
+    type: "numeric"
+    dimensions: dimensions_cd4
+
+mortality_by_art_cd4_7to12:
+  "AdultMortByCD4WithART7to12 MV2":
+    func: get_cd4_array_data
+    rows: list(male = 1, female = 2)
+    cols: 4:31
+    type: "numeric"
+    dimensions: dimensions_cd4
+  "AdultMortByCD4WithART7to12 MV":
+    func: get_cd4_array_data
+    rows: list(male = 2, female = 3)
+    cols: 4:31
+    type: "numeric"
+    dimensions: dimensions_cd4
+
+mortality_by_art_cd4_gt12:
+  "AdultMortByCD4WithARTGt12 MV2":
+    func: get_cd4_array_data
+    rows: list(male = 1, female = 2)
+    cols: 4:31
+    type: "numeric"
+    dimensions: dimensions_cd4
+  "AdultMortByCD4WithARTGt12 MV":
+    func: get_cd4_array_data
+    rows: list(male = 2, female = 3)
+    cols: 4:31
+    type: "numeric"
+    dimensions: dimensions_cd4
+
+art_mortality_rates:
+  "MortalityRates MV2":
+    func: get_art_mortality_rates
+    rows: 1:2
+  "MortalityRates MV":
+    func: get_art_mortality_rates
+    rows: 1
+  "fallback":
+    get_default_art_mortality_rates
+
+art_15plus_num_percent:
+  "HAARTBySexPerNum MV":
+    func: get_array_data
+    rows: 3:4
+    dimensions: dimensions_sex_year
+    type: "numeric"
+
+art_15plus_num:
+  "HAARTBySex MV":
+    func: get_array_data
+    rows: 3:4
+    dimensions: dimensions_sex_year
+    type: "numeric"
+
+art_15plus_need_art:
+  "NeedARTDec31 MV":
+    func: get_array_data
+    rows: 2:3
+    dimensions: dimensions_sex_year
+    type: "numeric"
+
+art_15plus_eligibility_threshold:
+  "CD4ThreshHoldAdults MV":
+    func: get_tag_data
+
+art_eligibility_pop:
+  "PopsEligTreat MV":
+    func: get_eligibility_pop_data
+    rows: 2:8
+    cols: 2:6
+
+median_cd4_init:
+  "MedCD4CountInit MV":
+    func: get_tag_data
+
+art_dropout:
+  "PercLostFollowup MV":
+    func: get_tag_data
+
+art_allocation_method:
+  "NewARTPatAllocationMethod MV2":
+    func: get_tag_data
+  "fallback":
+    function(...) 1L
+
+art_prop_alloc:
+  "NewARTPatAlloc MV":
+    func: get_tag_data
+  "fallback":
+    function(...) stats::setNames(c(0.5, 0.5), c("mx", "elig"))
+
+age_14_hiv_population:
+  "ChAged14ByCD4Cat MV":
+    func: get_array_data
+    type: "numeric"
+    ## 1 row for each combination of sex, number of paediatric disease
+    ## stages (PAED_DS) and each ART treatment stage (TS) plus 4 other
+    ## stages (perinatal, breast feeding 0 months, 6 months and 1 year)
+    rows: seq_len(NG * PAED_DS * (4 + TS))
+    dimensions: dimensions_age_14_hiv_population
+
+
+

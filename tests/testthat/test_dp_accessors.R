@@ -257,3 +257,11 @@ test_that("ART eligibility population data can be retrieved", {
               at minimum. rows are null: FALSE, cols are null: TRUE.")
   )
 })
+
+test_that("women on ART can data can be retrieved", {
+  tag_data <- get_raw_tag_data("RatioWomenOnART MV", dp_data_2016)
+  agegr <- get_agegr_labels(between_15_49_only = TRUE)
+  women_on_art <- get_women_on_art("RatioWomenOnART MV", tag_data, NULL, agegr)
+  expect_equivalent(women_on_art, rep(1, length(agegr)))
+  expect_equal(names(women_on_art), agegr)
+})

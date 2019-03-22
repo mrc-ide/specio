@@ -142,10 +142,9 @@ get_art_mortality <- function(dp_data) {
   mortality_7to12 <- get_property_data("mortality_by_art_cd4_7to12", dp_data)
   mortality_gt12 <- get_property_data("mortality_by_art_cd4_gt12", dp_data)
 
-  model_params <- get_model_params()
-  art_mort <- array(NA, c(model_params$TS, model_params$DS, 4, model_params$NG),
+  art_mort <- array(NA, c(cfg$params$TS, cfg$params$DS, 4, cfg$params$NG),
                     list(artdur = c("ART0MOS", "ART6MOS", "ART1YR"),
-                         cd4stage = seq_len(model_params$DS),
+                         cd4stage = seq_len(cfg$params$DS),
                          agecat = c("15-24", "25-34", "35-44", "45+"),
                          sex = c("male", "female")))
   art_mort[1, , , "male"] <- mortality_0to6[, , "male"]
@@ -193,10 +192,10 @@ get_scale_cd4_mortality <- function(valid_version) {
 #' @keywords internal
 #'
 get_property_data <- function(property, dp_data, ...) {
-  tags <- get_property_tags(property, ...)
+  tags <- get_property_tags(property)
   tag <- get_tag(tags, dp_data)
   if (tag == "fallback") {
-    return(tags[[tag]])
+    return(tags[[tag]](...))
   } else {
     tag_data <- get_raw_tag_data(tag, dp_data)
     return(tags[[tag]]$func(tag, tag_data, tags[[tag]], ...))
