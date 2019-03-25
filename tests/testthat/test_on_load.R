@@ -11,7 +11,7 @@ test_that(".onLoad correctly reads tag config", {
   expect_type(cfg$tags$total_population$`BigPop MV3`$rows, "integer")
 
   expect_true(!is.null(cfg$tags$art_prop_alloc$fallback))
-  expect_equal(cfg$tags$art_prop_alloc$fallback(),
+  expect_equal(cfg$tags$art_prop_alloc$fallback$func(),
                stats::setNames(c(0.5, 0.5), c("mx", "elig")))
 
   expect_true(!is.null(cfg$tags$art_eligibility_pop$`PopsEligTreat MV`))

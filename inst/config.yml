@@ -145,6 +145,10 @@ new_infections:
     rows: c(0:80 * 3 + 2, 0:80 * 3 + 3)
     type: "numeric"
     dimensions: dimensions_age_sex_year
+  "fallback":
+    func: get_default_array
+    dimensions: dimensions_age_sex_year
+    value: NA_real_
 
 art_pop:
   "OnARTBySingleAge MV":
@@ -152,6 +156,10 @@ art_pop:
     rows: c(0:80 * 3 + 2, 0:80 * 3 + 3)
     type: "numeric"
     dimensions: dimensions_age_sex_year
+  "fallback":
+    func: get_default_array
+    dimensions: dimensions_age_sex_year
+    value: NA_real_
 
 adult_infec_reduc:
   "AdultInfectReduc MV":
@@ -207,24 +215,25 @@ cd4_fertility_ratio:
     cols: seq_len(DS) + 4
     type: "numeric"
   "fallback":
-    function(...) rep(1.0, DS)
+    func: function(...) rep(1.0, DS)
 
 women_on_art:
   "RatioWomenOnART MV2":
     func: get_tag_data
-  "RatioWomenOnArt MV":
+  "RatioWomenOnART MV":
     func: get_women_on_art
-  "fallback": |-
-    function(...) {
-      stats::setNames(rep(1.0, fAG),
-                      get_agegr_labels(between_15_49_only = TRUE))
-    }
+  "fallback":
+    func: |-
+      function(...) {
+        stats::setNames(rep(1.0, fAG),
+                        get_agegr_labels(between_15_49_only = TRUE))
+      }
 
 frr_scalar:
   "FRRbyLocation MV":
     func: get_tag_data
   "fallback":
-    function(...) 1.0
+    func: function(...) 1.0
 
 new_infections_cd4:
   "AdultDistNewInfectionsCD4 MV":
@@ -306,7 +315,9 @@ art_mortality_rates:
     func: get_art_mortality_rates
     rows: 1
   "fallback":
-    get_default_art_mortality_rates
+    func: get_default_array
+    dimensions: dimensions_art
+    value: 1.0
 
 art_15plus_num_percent:
   "HAARTBySexPerNum MV":
@@ -351,13 +362,13 @@ art_allocation_method:
   "NewARTPatAllocationMethod MV2":
     func: get_tag_data
   "fallback":
-    function(...) 1L
+    func: function(...) 1L
 
 art_prop_alloc:
   "NewARTPatAlloc MV":
     func: get_tag_data
   "fallback":
-    function(...) stats::setNames(c(0.5, 0.5), c("mx", "elig"))
+    func: function(...) stats::setNames(c(0.5, 0.5), c("mx", "elig"))
 
 age_14_hiv_population:
   "ChAged14ByCD4Cat MV":
@@ -368,6 +379,9 @@ age_14_hiv_population:
     ## stages (perinatal, breast feeding 0 months, 6 months and 1 year)
     rows: seq_len(NG * PAED_DS * (4 + TS))
     dimensions: dimensions_age_14_hiv_population
-
+  "fallback":
+    func: get_default_array
+    dimensions: dimensions_age_14_hiv_population
+    value: NA_real_
 
 

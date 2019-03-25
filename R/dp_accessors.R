@@ -168,7 +168,9 @@ get_art_mortality_rates <- function(tag, tag_data, metadata, proj_years) {
     metadata$cols <- seq.int(start_index, start_index + length(proj_years) - 1)
   }
   mortality_data <- tag_data[metadata$rows, metadata$cols]
-  mortality_rates <- get_default_art_mortality_rates(proj_years)
+  array_data <- list(value = 1.0,
+                     dimensions = dimensions_art)
+  mortality_rates <- get_default_array(array_data, proj_years)
 
   if (nrow(mortality_data) == 1) {
     mortality_rates["ART0MOS", ] <- as.numeric(mortality_data[1, ])
@@ -229,16 +231,23 @@ get_eligibility_pop_data <- function(tag, tag_data, metadata, proj_years) {
   data
 }
 
-#' Get default ART mortality rates.
+#' Get default array data
 #'
-#' Defaults to using 1.0 for each point.
+#' Defaults to creating a data frame of a single value of dimensions specified
+#' by metadata.
 #'
+#' @metadata List containing value for array and dimensions of array.
 #' @param proj_years Years the projection is for.
 #'
 #' @keywords internal
-get_default_art_mortality_rates <- function(proj_years) {
-  dimensions <- dimensions_art(proj_years)
-  array(1.0, lengths(dimensions), dimensions)
+get_default_array <- function(metadata, proj_years) {
+  if (is.null(metadata$dimensions) || is.null(metadata$value)) {
+    stop(sprintfr("Must supply default dimesnions function and value to create
+         default array. Dimensions is null: %s  and value is null: %s",
+         is.null(metadata$dimensions), is.null(metadata$value)))
+  }
+  dims <- metadata$dimensions(proj_years)
+  array(eval(parse(text = metadata$value)), lengths(dims), dims)
 }
 
 

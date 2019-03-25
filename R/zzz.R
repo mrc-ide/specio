@@ -22,8 +22,8 @@ parse_config <- function(config) {
 parse_tag <- function(name, config, envir) {
   for (tag in names(config[[name]])) {
     config <- parse_function(tag, name, config, envir, "func")
+    config <- parse_function(tag, name, config, envir, "dimensions", FALSE)
     if (tag != "fallback") {
-      config <- parse_function(tag, name, config, envir, "dimensions", FALSE)
       config <- parse_rows_and_cols(tag, name, config, envir)
     }
   }
@@ -51,8 +51,11 @@ parse_function <- function(tag_name, property_name, config, envir,
                    func_field_name, property_name, tag_name))
     }
   } else {
-    config[[property_name]][[tag_name]] <-
-      eval_with_params(config[[property_name]][[tag_name]], envir)
+    if (!is.null(config[[property_name]][[tag_name]][[func_field_name]])) {
+    config[[property_name]][[tag_name]][[func_field_name]] <-
+      eval_with_params(config[[property_name]][[tag_name]][[func_field_name]],
+                       envir)
+    }
   }
   config
 }
