@@ -34,8 +34,8 @@ The `DP` file contains demographic projection data. The data is persisted as a `
 The `csv` contains 4 named columns, `Tag`, `Description`, `Notes` and `Data`. There are also an arbitrary number of extra columns all of which contain more data.
 
 ```{r, echo = FALSE}
-data <- specio:::get_dp_data(
-  system.file("testdata", "Botswana2018.PJNZ", package = "specio")
+data <- specio:::get_pjnz_csv_data(
+  system.file("testdata", "Botswana2018.PJNZ", package = "specio"), "DP"
 )
 str(data[1:10])
 ```

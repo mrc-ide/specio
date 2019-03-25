@@ -50,13 +50,14 @@ readlines_from_path <- function(pjnz_path, extension) {
   lines <- readLines(con)
 }
 
-#' Get data from DP file.
+#' Get csv data from file containing within PJNZ.
 #'
-#' @param pjnz_path Path to zip containing DP file.
+#' @param pjnz_path Path to PJNZ zip file.
+#' @param extension The file extension to look for.
 #'
 #' @return The data from file read as a csv.
 #'
-get_dp_data <- function(pjnz_path) {
-  dpfile <- get_filename_from_extension("DP", pjnz_path)
-  csv <- utils::read.csv(unz(pjnz_path, dpfile), as.is = TRUE)
+get_pjnz_csv_data <- function(pjnz_path, extension) {
+  file <- get_filename_from_extension(extension, pjnz_path)
+  csv <- utils::read.csv(unz(pjnz_path, file), as.is = TRUE)
 }
