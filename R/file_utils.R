@@ -57,6 +57,7 @@ readlines_from_path <- function(pjnz_path, extension) {
 #' @param pjnz_path Path to PJNZ zip file containing DP file.
 #'
 #' @return The data from file read as a csv.
+#'
 #' @keywords internal
 get_dp_data <- function(pjnz_path) {
   get_pjnz_csv_data(pjnz_path, "DP")
@@ -81,6 +82,11 @@ get_pjn_data <- function(pjnz_path) {
 #' @return The data from file read as a csv.
 #'
 #' @keywords internal
+#'
+#' @examples
+#' pjnz <- system.file("testdata", "Botswana2018.PJNZ", package = "specio")
+#' specio:::get_pjnz_csv_data(pjnz, "DP")
+#' specio:::get_pjnz_csv_data(pjnz, "PJN")
 get_pjnz_csv_data <- function(pjnz_path, extension) {
   file <- get_filename_from_extension(extension, pjnz_path)
   csv <- utils::read.csv(unz(pjnz_path, file), as.is = TRUE)

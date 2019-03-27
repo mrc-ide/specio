@@ -17,4 +17,9 @@ The data from file read as a csv.
 \description{
 Get csv data from file containing within PJNZ
 }
+\examples{
+pjnz <- system.file("testdata", "Botswana2018.PJNZ", package = "specio")
+specio:::get_pjnz_csv_data(pjnz, "DP")
+specio:::get_pjnz_csv_data(pjnz, "PJN")
+}
 \keyword{internal}
