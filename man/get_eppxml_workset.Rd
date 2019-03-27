@@ -16,3 +16,4 @@ The workset as a list.
 Gets all properties of the EPP workset from xml file inside zip at specified
 path.
 }
+\keyword{internal}

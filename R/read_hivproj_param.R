@@ -1,6 +1,6 @@
 read_hivproj_param <- function(pjnz_path) {
-  dp_data <- get_pjnz_csv_data(pjnz_path, "DP")
-  pjn_data <- get_pjnz_csv_data(pjnz_path, "PJN")
+  dp_data <- get_dp_data(pjnz_path)
+  pjn_data <- get_pjn_data(pjnz_path)
 
   pjn_metadata <- get_pjn_metadata(pjn_data)
 
