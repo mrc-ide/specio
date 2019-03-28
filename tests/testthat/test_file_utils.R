@@ -28,10 +28,14 @@ test_that("xml workset can be read from file", {
   expect_equal(names(workset), attr(workset, "names"))
 })
 
-test_that("DP data can be read", {
+test_that("DP and PJN data can be read", {
   zip_path <- system.file("testdata", "Botswana2018.PJNZ", package = "specio")
   dp_data <- get_dp_data(zip_path)
   ## Simple smoke test data has been read
   expect_length(names(dp_data), 84)
+
+  pjn_data <- get_pjn_data(zip_path)
+  ## Simple smoke test data has been read
+  expect_length(names(pjn_data), 59)
 })
 

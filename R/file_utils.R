@@ -33,6 +33,7 @@ get_filename_from_extension <- function(file_extension, path_to_zip) {
 #'
 #' @return The workset as a list.
 #'
+#' @keywords internal
 get_eppxml_workset <- function(pjnz_path) {
   xmlfile <- get_filename_from_extension("xml", pjnz_path)
   con <- unz(pjnz_path, xmlfile)
@@ -50,13 +51,43 @@ readlines_from_path <- function(pjnz_path, extension) {
   lines <- readLines(con)
 }
 
-#' Get data from DP file.
+
+#' Get data from DP file
 #'
-#' @param pjnz_path Path to zip containing DP file.
+#' @param pjnz_path Path to PJNZ zip file containing DP file.
 #'
 #' @return The data from file read as a csv.
 #'
+#' @keywords internal
 get_dp_data <- function(pjnz_path) {
-  dpfile <- get_filename_from_extension("DP", pjnz_path)
-  csv <- utils::read.csv(unz(pjnz_path, dpfile), as.is = TRUE)
+  get_pjnz_csv_data(pjnz_path, "DP")
+}
+
+#' Get data from PJN file
+#'
+#' @param pjnz_path Path to PJNZ zip file containing PJN file.
+#'
+#' @return The data from file read as a csv.
+#'
+#' @keywords internal
+get_pjn_data <- function(pjnz_path) {
+  get_pjnz_csv_data(pjnz_path, "PJN")
+}
+
+#' Get csv data from file containing within PJNZ
+#'
+#' @param pjnz_path Path to PJNZ zip file.
+#' @param extension The file extension to look for.
+#'
+#' @return The data from file read as a csv.
+#'
+#' @keywords internal
+#'
+#' @examples
+#' pjnz <- system.file("testdata", "Botswana2018.PJNZ", package = "specio")
+#' specio:::get_pjnz_csv_data(pjnz, "DP")
+#' specio:::get_pjnz_csv_data(pjnz, "PJN")
+get_pjnz_csv_data <- function(pjnz_path, extension) {
+  file <- get_filename_from_extension(extension, pjnz_path)
+  csv <- utils::read.csv(unz(pjnz_path, file), as.is = TRUE)
 }

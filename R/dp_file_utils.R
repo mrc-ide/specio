@@ -165,28 +165,6 @@ is.na_or_empty <- function(x) {
   is.na(x) | x == ""
 }
 
-#' Get the version of Spectrum the dp data is for.
-#'
-#' Find the version of the Spectrum which created the dp data by inspecting a
-#' tag.
-#'
-#' @param dp_data The dp_data to get the version for.
-#'
-#' @keywords internal
-get_spectrum_version <- function(dp_data) {
-  ## Infer the version based on the first tag which is in 1st column of 2nd row
-  test_tag <- dp_data[2, 1]
-  if (test_tag == "<FirstYear MV>") {
-    dp_vers <- "Spectrum2016"
-  } else if (test_tag == "<FirstYear MV2>") {
-    dp_vers <- "Spectrum2017"
-  } else {
-    stop(sprintfr("Spectrum DP file version not recognised. Only Spectrum
-                  versions from 2016 onwards are supported."))
-  }
-  dp_vers
-}
-
 get_tag <- function(tags, dp_data) {
   counter <- 0
   final_tag <- NULL

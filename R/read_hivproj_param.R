@@ -1,6 +1,8 @@
 read_hivproj_param <- function(pjnz_path) {
   dp_data <- get_dp_data(pjnz_path)
-  spectrum_vers <- get_spectrum_version(dp_data)
+  pjn_data <- get_pjn_data(pjnz_path)
+
+  pjn_metadata <- get_pjn_metadata(pjn_data)
 
   version <- get_property_data("version", dp_data)
   valid_date <- get_property_data("valid_date", dp_data)
@@ -70,6 +72,11 @@ read_hivproj_param <- function(pjnz_path) {
                                              proj_years)
 
   output <- list(
+    country = pjn_metadata$country,
+    iso3 = pjn_metadata$iso3,
+    region = pjn_metadata$region,
+    projection_name = pjn_metadata$projection_name,
+    spectrum_version = pjn_metadata$spectrum_version,
     valid_date = valid_date,
     yr_start = yr_start,
     yr_end = yr_end,
