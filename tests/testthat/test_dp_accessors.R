@@ -276,3 +276,14 @@ test_that("default array can be created", {
   expect_equivalent(default_data, array(NA, 11))
   expect_equal(names(default_data), as.character(1970:1980))
 })
+
+test_that("default array returns useful errors", {
+  metadata <- list()
+  metadata$dimensions <- function(proj_years) {
+    list(year = proj_years)
+  }
+  expect_error(get_default_array(metadata, 1970:1980), sprintfr(
+               "Must supply default dimensions function and value to create
+               default array. Dimensions is null: FALSE and value is null: TRUE"
+               ))
+})

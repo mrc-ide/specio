@@ -7,6 +7,8 @@
 get_default_array(metadata, proj_years)
 }
 \arguments{
+\item{metadata}{List containing value for array and dimensions of array.}
+
 \item{proj_years}{Years the projection is for.}
 }
 \description{

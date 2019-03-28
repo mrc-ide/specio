@@ -236,13 +236,13 @@ get_eligibility_pop_data <- function(tag, tag_data, metadata, proj_years) {
 #' Defaults to creating a data frame of a single value of dimensions specified
 #' by metadata.
 #'
-#' @metadata List containing value for array and dimensions of array.
+#' @param metadata List containing value for array and dimensions of array.
 #' @param proj_years Years the projection is for.
 #'
 #' @keywords internal
 get_default_array <- function(metadata, proj_years) {
   if (is.null(metadata$dimensions) || is.null(metadata$value)) {
-    stop(sprintfr("Must supply default dimesnions function and value to create
+    stop(sprintfr("Must supply default dimensions function and value to create
          default array. Dimensions is null: %s  and value is null: %s",
          is.null(metadata$dimensions), is.null(metadata$value)))
   }
