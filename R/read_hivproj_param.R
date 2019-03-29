@@ -43,7 +43,7 @@ read_hivproj_param <- function(pjnz_path) {
 
   ## Natural history
 
-  new_infections <- get_property_data("new_infections_cd4", dp_data)
+  new_infections_cd4 <- get_property_data("new_infections_cd4", dp_data)
   progress_cd4 <- get_property_data("progress_cd4", dp_data)
   mortality_cd4 <- get_property_data("mortality_cd4", dp_data)
   art_mortality_cd4 <- get_art_mortality(dp_data)
@@ -95,9 +95,9 @@ read_hivproj_param <- function(pjnz_path) {
     incrr_age = dist_of_hiv,
     fert_rat = aim_params$fert_rat,
     cd4fert_rat = aim_params$cd4fert_rat,
-    ffr_art6mos = aim_params$ffr_art6mos,
+    frr_art6mos = aim_params$frr_art6mos,
     frr_scalar = aim_params$frr_scalar,
-    cd4_initdist = new_infections,
+    cd4_initdist = new_infections_cd4,
     cd4_prog = progress_cd4,
     cd4_mort = mortality_cd4,
     art_mort = art_mortality_cd4,
@@ -134,7 +134,7 @@ get_impact_model_params <- function(dp_data, proj_years) {
   output <- list(
     fert_rat = fertility_ratio,
     cd4fert_rat = cd4_fertility_ratio,
-    ffr_art6mos = women_on_art,
+    frr_art6mos = women_on_art,
     frr_scalar = frr_scalar
   )
 }
@@ -202,7 +202,8 @@ get_property_data <- function(property, dp_data, ...) {
   tags <- get_property_tags(property)
   tag <- get_tag(tags, dp_data)
   if (tag == "fallback") {
-    return(tags[[tag]](...))
+    metadata <- tags[[tag]][-which((names(tags[[tag]]) == "func"))]
+    return(tags[[tag]]$func(metadata, ...))
   } else {
     tag_data <- get_raw_tag_data(tag, dp_data)
     return(tags[[tag]]$func(tag, tag_data, tags[[tag]], ...))
@@ -227,6 +228,7 @@ calc_age_specific_fertility_rate <- function(fertility_rate, births_proportion){
   asfr <- sweep(asfr, 2, fertility_rate, "*")
   dimnames(asfr) <- list(age = 15:49,
                          year = dimnames(births_proportion)[["year"]])
+  dim(asfr) <- lengths(dimnames(asfr))
   asfr
 }
 
@@ -261,5 +263,3 @@ calc_net_migration <- function(total_net_migr, net_migr_age_dist){
   migr_data <- array(unlist(migr_data), lengths(dn), dn)
   migr_data
 }
-
-

@@ -265,3 +265,25 @@ test_that("women on ART can data can be retrieved", {
   expect_equivalent(women_on_art, rep(1, length(agegr)))
   expect_equal(names(women_on_art), agegr)
 })
+
+test_that("default array can be created", {
+  metadata <- list()
+  metadata$dimensions <- function(proj_years) {
+    list(year = proj_years)
+  }
+  metadata$value <- NA
+  default_data <- get_default_array(metadata, 1970:1980)
+  expect_equivalent(default_data, array(NA, 11))
+  expect_equal(names(default_data), as.character(1970:1980))
+})
+
+test_that("default array returns useful errors", {
+  metadata <- list()
+  metadata$dimensions <- function(proj_years) {
+    list(year = proj_years)
+  }
+  expect_error(get_default_array(metadata, 1970:1980), sprintfr(
+               "Must supply default dimensions function and value to create
+               default array. Dimensions is null: FALSE and value is null: TRUE"
+               ))
+})
