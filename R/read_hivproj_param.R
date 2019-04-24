@@ -15,7 +15,7 @@ read_hivproj_param <- function(pjnz_path) {
 
   ## Demographic inputs
   total_population <- get_property_data("total_population", dp_data, proj_years)
-  sx <- get_property_data("survey_rate", dp_data, proj_years)
+  sx <- get_property_data("survival_rate", dp_data, proj_years)
   fertility_rate <- get_property_data("fertility_rate", dp_data, proj_years)
   births_proportion <- get_property_data("asfd", dp_data, proj_years)
   age_specific_fertility_rate <-

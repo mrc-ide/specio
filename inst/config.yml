@@ -64,7 +64,7 @@ total_population:
     type: "numeric"
     dimensions: dimensions_age_sex_year
 
-survey_rate:
+survival_rate:
   ## Extracts Sx for age 0-79 and 80+. Spectrum caculates a separate Sx for
   ## age 80. Population projection model in EPP-ASM needs to be updated to
   ## handle this.
