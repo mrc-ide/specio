@@ -8,10 +8,9 @@ read_hivproj_param <- function(pjnz_path) {
   valid_date <- get_property_data("valid_date", dp_data)
   valid_version <- get_property_data("valid_version", dp_data)
 
-  ## Projection parameters
   yr_start <- get_property_data("yr_start", dp_data)
   yr_end <- get_property_data("yr_end", dp_data)
-  proj_years <- seq.int(yr_start, yr_end)
+  proj_years <- get_projection_years(dp_data)
 
   ## Demographic inputs
   total_population <- get_property_data("total_population", dp_data, proj_years)
@@ -262,4 +261,17 @@ calc_net_migration <- function(total_net_migr, net_migr_age_dist){
   dn <- dimensions_age_sex_year(colnames(total_net_migr))
   migr_data <- array(unlist(migr_data), lengths(dn), dn)
   migr_data
+}
+
+#' Get years of the projection from dp data
+#'
+#' @param dp_data The dp data to get the projections years from.
+#'
+#' @return Sequence of projection years.
+#'
+#' @keywords internal
+get_projection_years <- function(dp_data) {
+  yr_start <- get_property_data("yr_start", dp_data)
+  yr_end <- get_property_data("yr_end", dp_data)
+  seq.int(yr_start, yr_end)
 }
