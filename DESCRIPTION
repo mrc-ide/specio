@@ -14,6 +14,8 @@ Imports:
     beers,
     xml2,
     yaml
+Remotes:
+    mrc-ide/beers
 Suggests: 
     testthat,
     knitr,
