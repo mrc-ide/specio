@@ -1,6 +1,6 @@
 Package: specio
 Title: Read Spectrum Files
-Version: 0.0.1
+Version: 0.1.0
 Authors@R: 
     person(given = "Robert",
            family = "Ashton",
@@ -14,6 +14,8 @@ Imports:
     beers,
     xml2,
     yaml
+Remotes:
+    mrc-ide/beers
 Suggests: 
     testthat,
     knitr,
