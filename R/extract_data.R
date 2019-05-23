@@ -11,11 +11,11 @@
 #'
 #' @examples
 #' pjnz_path <- system.file("testdata", "Botswana2017.PJNZ", package = "specio")
-#' population <- get_total_pop(pjnz_path)
-#' pop_long <- get_total_pop(pjnz_path, TRUE)
+#' population <- read_total_pop(pjnz_path)
+#' pop_long <- read_total_pop(pjnz_path, TRUE)
 #'
-get_total_pop <- function(pjnz_path, long_format = FALSE) {
-  get_data_from_pjnz(pjnz_path, "total_population", long_format, "total_pop")
+read_total_pop <- function(pjnz_path, long_format = FALSE) {
+  read_data_from_pjnz(pjnz_path, "total_population", long_format, "total_pop")
 }
 
 #' Extract people living with HIV (PLHIV) from PJNZ file
@@ -31,11 +31,11 @@ get_total_pop <- function(pjnz_path, long_format = FALSE) {
 #'
 #' @examples
 #' pjnz_path <- system.file("testdata", "Botswana2017.PJNZ", package = "specio")
-#' hiv_population <- get_hiv_pop(pjnz_path)
-#' hiv_pop_long <- get_hiv_pop(pjnz_path, TRUE)
+#' hiv_population <- read_hiv_pop(pjnz_path)
+#' hiv_pop_long <- read_hiv_pop(pjnz_path, TRUE)
 #'
-get_hiv_pop <- function(pjnz_path, long_format = FALSE) {
-  get_data_from_pjnz(pjnz_path, "hiv_pop", long_format, "hiv_pop")
+read_hiv_pop <- function(pjnz_path, long_format = FALSE) {
+  read_data_from_pjnz(pjnz_path, "hiv_pop", long_format, "hiv_pop")
 }
 
 #' Extract ART population data from PJNZ file
@@ -51,11 +51,11 @@ get_hiv_pop <- function(pjnz_path, long_format = FALSE) {
 #'
 #' @examples
 #' pjnz_path <- system.file("testdata", "Botswana2017.PJNZ", package = "specio")
-#' art_population <- get_art_pop(pjnz_path)
-#' art_pop_long <- get_art_pop(pjnz_path, TRUE)
+#' art_population <- read_art_pop(pjnz_path)
+#' art_pop_long <- read_art_pop(pjnz_path, TRUE)
 #'
-get_art_pop <- function(pjnz_path, long_format = FALSE) {
-  get_data_from_pjnz(pjnz_path, "art_pop", long_format, "art_pop")
+read_art_pop <- function(pjnz_path, long_format = FALSE) {
+  read_data_from_pjnz(pjnz_path, "art_pop", long_format, "art_pop")
 }
 
 #' Get data from PJNZ file for a single property
@@ -72,7 +72,7 @@ get_art_pop <- function(pjnz_path, long_format = FALSE) {
 #' @return Data extracted from PJNZ.
 #'
 #' @keywords internal
-get_data_from_pjnz <- function(pjnz_path, property, long_format,
+read_data_from_pjnz <- function(pjnz_path, property, long_format,
                             long_format_label) {
   dp_data <- get_dp_data(pjnz_path)
   data <- get_property_data(property, dp_data, get_projection_years(dp_data))
