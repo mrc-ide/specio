@@ -10,6 +10,7 @@ get_pjn_metadata <- function(pjn_data) {
   properties$iso3 <- country$iso3
   properties$iso_numeric <- country$iso_numeric
   properties$region <- get_pjn_region(pjn_data)
+  properties$region_code <- get_pjn_region_code(pjn_data)
   properties$spectrum_version <-
     pjn_data[which(pjn_data[, "Tag"] == "<Projection General>") + 4, "Data"]
   properties$projection_name <-
@@ -47,4 +48,18 @@ get_pjn_region <- function(pjn) {
   } else {
     return(region)
   }
+}
+
+#' Get subnational region code from parsed PJN
+#'
+#' @keywords internal
+get_pjn_region_code <- function(pjn) {
+  idx <- which(pjn[, "Tag"] == "<Projection Parameters - Subnational Region Name2>") + 3
+  region_code <- pjn[idx, "Data"]
+
+  if (region_code == "") {
+    return(NULL)
+  }
+
+  as.integer(region_code)
 }
