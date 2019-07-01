@@ -8,6 +8,7 @@ get_pjn_metadata <- function(pjn_data) {
   country <- get_pjn_country(pjn_data)
   properties$country <- country$country
   properties$iso3 <- country$iso3
+  properties$iso_numeric <- country$iso_numeric
   properties$region <- get_pjn_region(pjn_data)
   properties$spectrum_version <-
     pjn_data[which(pjn_data[, "Tag"] == "<Projection General>") + 4, "Data"]
@@ -29,7 +30,8 @@ get_pjn_country <- function(pjn) {
   idx <- which(spectrum5_countrylist$Code == cc)
   list(
     country = spectrum5_countrylist$Country[idx],
-    iso3 = cc
+    iso3 = spectrum5_countrylist$iso3[idx],
+    iso_numeric = cc
   )
 }
 
