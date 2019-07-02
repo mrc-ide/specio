@@ -40,14 +40,14 @@ get_pjn_country <- function(pjn) {
 #'
 #' @keywords internal
 get_pjn_region <- function(pjn) {
-  region <- pjn[which(
-    pjn[, "Tag"] == "<Projection Parameters - Subnational Region Name2>") + 2,
-    "Data"]
+  idx <- which(pjn[, "Tag"] == "<Projection Parameters - Subnational Region Name2>") + 2
+  region <- pjn[idx , "Data"]
+  
   if (region == "") {
     return(NULL)
-  } else {
-    return(region)
   }
+
+  region
 }
 
 #' Get subnational region code from parsed PJN
