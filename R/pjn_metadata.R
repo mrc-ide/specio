@@ -8,7 +8,9 @@ get_pjn_metadata <- function(pjn_data) {
   country <- get_pjn_country(pjn_data)
   properties$country <- country$country
   properties$iso3 <- country$iso3
+  properties$iso_numeric <- country$iso_numeric
   properties$region <- get_pjn_region(pjn_data)
+  properties$region_code <- get_pjn_region_code(pjn_data)
   properties$spectrum_version <-
     pjn_data[which(pjn_data[, "Tag"] == "<Projection General>") + 4, "Data"]
   properties$projection_name <-
@@ -29,7 +31,8 @@ get_pjn_country <- function(pjn) {
   idx <- which(spectrum5_countrylist$Code == cc)
   list(
     country = spectrum5_countrylist$Country[idx],
-    iso3 = cc
+    iso3 = spectrum5_countrylist$iso3[idx],
+    iso_numeric = cc
   )
 }
 
@@ -37,12 +40,34 @@ get_pjn_country <- function(pjn) {
 #'
 #' @keywords internal
 get_pjn_region <- function(pjn) {
-  region <- pjn[which(
-    pjn[, "Tag"] == "<Projection Parameters - Subnational Region Name2>") + 2,
-    "Data"]
+
+  idx <- which(pjn[, "Tag"] == "<Projection Parameters - Subnational Region Name2>") + 2
+  region <- pjn[idx , "Data"]
+
   if (region == "") {
-    return(NULL)
-  } else {
-    return(region)
+    region <- NA_character_
   }
+
+  region
+}
+
+#' Get subnational region code from parsed PJN
+#'
+#' @details
+#' region_code = 0 indicates no subnational region
+#'
+#' @keywords internal
+get_pjn_region_code <- function(pjn) {
+
+  idx <- which(pjn[, "Tag"] == "<Projection Parameters - Subnational Region Name2>") + 3
+  region_code <- pjn[idx, "Data"]
+
+  if (region_code == "") {
+    ## 0 region code is default value for subnational region in Spectrum
+    region_code <- 0L
+  } else {
+    region_code <- as.integer(region_code)
+  }
+
+  region_code
 }
