@@ -4,8 +4,10 @@ test_that("projection metadata can be read from PJN file for Botswana 2018", {
   pjn_data <- get_pjn_metadata(pjn_botswana_2018)
 
   expect_equal(pjn_data$country, "Botswana")
-  expect_equal(pjn_data$iso3, 72)
-  expect_null(pjn_data$region)
+  expect_equal(pjn_data$iso_numeric, 72)
+  expect_equal(pjn_data$iso3, "BWA")
+  expect_equal(pjn_data$region, NA_character_)
+  expect_equal(pjn_data$region_code, 0L)
   expect_equal(pjn_data$spectrum_version, "5.63")
   expect_equal(pjn_data$projection_name, "Botswana_ 2018 updated ART")
 })
@@ -14,8 +16,10 @@ test_that("projection metadata can be read from PJN file for Mozambique 2018", {
   pjn_data <- get_pjn_metadata(pjn_mozambique_2018)
 
   expect_equal(pjn_data$country, "Mozambique")
-  expect_equal(pjn_data$iso3, 508)
+  expect_equal(pjn_data$iso_numeric, 508)
+  expect_equal(pjn_data$iso3, "MOZ")
   expect_equal(pjn_data$region, "SOUTH_Maputo Cidade")
+  expect_equal(pjn_data$region_code, 1L)
   expect_equal(pjn_data$spectrum_version, "5.63")
   expect_equal(pjn_data$projection_name,
                "11_MZ_Maputo Cidade_v5_63_updated census_22_01_2018")

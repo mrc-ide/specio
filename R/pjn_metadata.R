@@ -40,11 +40,12 @@ get_pjn_country <- function(pjn) {
 #'
 #' @keywords internal
 get_pjn_region <- function(pjn) {
+
   idx <- which(pjn[, "Tag"] == "<Projection Parameters - Subnational Region Name2>") + 2
   region <- pjn[idx , "Data"]
   
   if (region == "") {
-    return(NULL)
+    region <- NA_character_
   }
 
   region
@@ -52,14 +53,20 @@ get_pjn_region <- function(pjn) {
 
 #' Get subnational region code from parsed PJN
 #'
+#' @details
+#' region_code = 0 indicates no subnational region
+#' 
 #' @keywords internal
 get_pjn_region_code <- function(pjn) {
+
   idx <- which(pjn[, "Tag"] == "<Projection Parameters - Subnational Region Name2>") + 3
   region_code <- pjn[idx, "Data"]
 
   if (region_code == "") {
-    return(NULL)
+    region_code <- 0L
+  } else {
+    region_code <- as.integer(region_code)
   }
 
-  as.integer(region_code)
+  region_code
 }
