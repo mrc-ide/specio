@@ -43,7 +43,7 @@ get_pjn_region <- function(pjn) {
 
   idx <- which(pjn[, "Tag"] == "<Projection Parameters - Subnational Region Name2>") + 2
   region <- pjn[idx , "Data"]
-  
+
   if (region == "") {
     region <- NA_character_
   }
@@ -55,7 +55,7 @@ get_pjn_region <- function(pjn) {
 #'
 #' @details
 #' region_code = 0 indicates no subnational region
-#' 
+#'
 #' @keywords internal
 get_pjn_region_code <- function(pjn) {
 
@@ -63,6 +63,7 @@ get_pjn_region_code <- function(pjn) {
   region_code <- pjn[idx, "Data"]
 
   if (region_code == "") {
+    ## 0 region code is default value for subnational region in Spectrum
     region_code <- 0L
   } else {
     region_code <- as.integer(region_code)
