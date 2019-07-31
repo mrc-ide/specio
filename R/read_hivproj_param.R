@@ -1,3 +1,14 @@
+#' Read params from DP and PJN file required for HIV model.
+#'
+#' @param pjnz_path Path to PJNZ zip file containing DP file and PJN file.
+#'
+#' @return List of model params.
+#'
+#' @export
+#'
+#' @examples
+#' pjnz_path <- system.file("testdata", "Botswana2017.PJNZ", package = "specio")
+#' read_hivproj_param(pjnz_path)
 read_hivproj_param <- function(pjnz_path) {
   dp_data <- get_dp_data(pjnz_path)
   pjn_data <- get_pjn_data(pjnz_path)
