@@ -89,5 +89,9 @@ get_pjn_data <- function(pjnz_path) {
 #' specio:::get_pjnz_csv_data(pjnz, "PJN")
 get_pjnz_csv_data <- function(pjnz_path, extension) {
   file <- get_filename_from_extension(extension, pjnz_path)
-  csv <- utils::read.csv(unz(pjnz_path, file), as.is = TRUE)
+  ## Use UTF-8-BOM encoding to remove the Byte order mark at the start of the
+  ## file if it is present. This is ignored by default on Linux but included
+  ## when reading the file on windows.
+  csv <- utils::read.csv(unz(pjnz_path, file), stringsAsFactors = FALSE,
+                         encoding = "UTF-8-BOM")
 }
