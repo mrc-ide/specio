@@ -12,7 +12,9 @@ As well as the functions required for EPP `specio` also provides 2 more general 
 
 ## Installation
 
+To install internally released version via drat:
 ```r
-# install.packages("devtools")
-devtools::install_github("mrc-ide/specio")
+# install.packages("drat") # (if needed)
+drat:::add("mrc-ide")
+install.packages("specio")
 ```
