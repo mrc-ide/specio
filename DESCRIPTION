@@ -1,6 +1,6 @@
 Package: specio
 Title: Read Spectrum Files
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: 
     person(given = "Robert",
            family = "Ashton",
