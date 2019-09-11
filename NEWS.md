@@ -1,3 +1,7 @@
+## 0.1.2
+
+Fix bug reading Spectrum 2019 files
+
 ## 0.1.1
 
 Fix bug on windows where read.csv including byte order mark in column names of DP file
