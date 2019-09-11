@@ -74,8 +74,7 @@ read_hivproj_param <- function(pjnz_path) {
                                            proj_years)
   median_cd4_init <- get_property_data("median_cd4_init", dp_data, proj_years)
   art_dropout <- get_property_data("art_dropout", dp_data, proj_years)
-  art_allocation_method <- get_property_data("art_allocation_method", dp_data,
-                                             proj_years)
+  art_allocation_method <- get_property_data("art_allocation_method", dp_data)
   art_prop_alloc <- get_property_data("art_prop_alloc", dp_data, c("mx", "elig"))
   scale_cd4_mortality <- get_scale_cd4_mortality(valid_version)
   age_14_hiv_population <- get_property_data("age_14_hiv_population", dp_data,

@@ -17,9 +17,7 @@ test_that("Botswana2018 XML data is read correctly", {
 })
 
 test_that("Mozambique_Maputo_Cidade2018 XML data is read correctly", {
-  pjnz_path <- system.file("testdata", "Mozambique_Maputo_Cidade2018.PJNZ",
-    package = "specio"
-  )
+  pjnz_path <- file.path("pjnz_testdata", "Mozambique_Maputo_Cidade2018.PJNZ")
 
   epp_data <- specio::read_epp_data(pjnz_path)
   epp_data_ref <- readRDS(
@@ -29,9 +27,7 @@ test_that("Mozambique_Maputo_Cidade2018 XML data is read correctly", {
 })
 
 test_that("DominicanRepublic2017 XML data is read correctly", {
-  pjnz_path <- system.file("testdata", "DominicanRepublic2017.PJNZ",
-    package = "specio"
-  )
+  pjnz_path <- file.path("pjnz_testdata", "DominicanRepublic2017.PJNZ")
 
   epp_data <- specio::read_epp_data(pjnz_path)
   epp_data_ref <- readRDS("testdata/DominicanRepublic2017_epp_data.rds")
@@ -64,9 +60,7 @@ test_that("Botswana2018 subpopulation data is read correctly", {
 })
 
 test_that("Mozambique_Maputo_Cidade2018 subpopulation data is read correctly", {
-  pjnz_path <- system.file("testdata", "Mozambique_Maputo_Cidade2018.PJNZ",
-    package = "specio"
-  )
+  pjnz_path <- file.path("pjnz_testdata", "Mozambique_Maputo_Cidade2018.PJNZ")
 
   subpop_data <- specio::read_epp_subpops(pjnz_path)
   subpop_data_ref <- readRDS(
@@ -76,9 +70,7 @@ test_that("Mozambique_Maputo_Cidade2018 subpopulation data is read correctly", {
 })
 
 test_that("DominicanRepublic2017 subpopulation data is read correctly", {
-  pjnz_path <- system.file("testdata", "DominicanRepublic2017.PJNZ",
-    package = "specio"
-  )
+  pjnz_path <- file.path("pjnz_testdata", "DominicanRepublic2017.PJNZ")
 
   subpop_data <- specio::read_epp_subpops(pjnz_path)
   subpop_data_ref <- readRDS("testdata/DominicanRepublic2017_subpop_data.rds")
