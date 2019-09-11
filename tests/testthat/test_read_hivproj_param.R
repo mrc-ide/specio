@@ -175,3 +175,10 @@ test_that("params are available to fallback functions", {
   art_mort <- get_property_data("art_mortality_rates", dp_data_2016, proj_years)
   expect_equivalent(ncol(art_mort), length(proj_years))
 })
+
+test_that("2019 data can be read", {
+  pjnz_path <- system.file("testdata", "Malawi2019.PJNZ", package = "specio")
+  hivproj <- read_hivproj_param(pjnz_path)
+  expect_equal(hivproj$country, "Malawi")
+  expect_equal(hivproj$iso3, 454)
+})
