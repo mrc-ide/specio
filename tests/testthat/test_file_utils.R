@@ -2,7 +2,7 @@ context("file_utils")
 
 
 test_that("filename can be read from zip", {
-  zip_path <- system.file("testdata", "Netherlands2017.PJNZ", package = "specio")
+  zip_path <- file.path("pjnz_testdata", "Netherlands2017.PJNZ")
   expect_error(
     get_filename_from_extension("xml", zip_path),
     paste0(

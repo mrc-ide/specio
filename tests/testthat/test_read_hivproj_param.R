@@ -49,8 +49,7 @@ test_that("Botswana2018 hivproj data is read correctly", {
 })
 
 test_that("Mozambique2018 hivproj data is read correctly", {
-  pjnz_path <- system.file("testdata", "Mozambique_Maputo_Cidade2018.PJNZ",
-                           package = "specio")
+  pjnz_path <- file.path("pjnz_testdata", "Mozambique_Maputo_Cidade2018.PJNZ")
 
   hivproj <- read_hivproj_param(pjnz_path)
   hivproj_ref <- readRDS("testdata/Mozambique_Maputo_Cidade2018_hivproj.rds")
@@ -74,8 +73,7 @@ test_that("Mozambique2018 hivproj data is read correctly", {
 })
 
 test_that("DominicanRepublic2017 hivproj data is read correctly", {
-  pjnz_path <- system.file("testdata", "DominicanRepublic2017.PJNZ",
-                           package = "specio")
+  pjnz_path <- file.path("pjnz_testdata", "DominicanRepublic2017.PJNZ")
 
   hivproj <- read_hivproj_param(pjnz_path)
   hivproj_ref <- readRDS("testdata/DominicanRepublic2017_hivproj.rds")
@@ -99,8 +97,7 @@ test_that("DominicanRepublic2017 hivproj data is read correctly", {
 })
 
 test_that("Netherlands2017 hivproj data is read correctly", {
-  pjnz_path <- system.file("testdata", "Netherlands2017.PJNZ",
-                           package = "specio")
+  pjnz_path <- file.path("pjnz_testdata", "Netherlands2017.PJNZ")
 
   hivproj <- read_hivproj_param(pjnz_path)
   hivproj_ref <- readRDS("testdata/Netherlands2017_hivproj.rds")
@@ -177,7 +174,7 @@ test_that("params are available to fallback functions", {
 })
 
 test_that("2019 data can be read", {
-  pjnz_path <- system.file("testdata", "Malawi2019.PJNZ", package = "specio")
+  pjnz_path <- file.path("pjnz_testdata", "Malawi2019.PJNZ")
   hivproj <- read_hivproj_param(pjnz_path)
   expect_equal(hivproj$country, "Malawi")
   expect_equal(hivproj$iso3, 454)
