@@ -12,7 +12,6 @@ Encoding: UTF-8
 LazyData: true
 Imports:
     beers,
-    readr,
     xml2,
     yaml
 Remotes:
