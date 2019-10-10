@@ -2,7 +2,7 @@
 % Please edit documentation in R/file_utils.R
 \name{get_pjnz_csv_data}
 \alias{get_pjnz_csv_data}
-\title{Get csv data from file containing within PJNZ}
+\title{Get csv data from file contained within PJNZ}
 \usage{
 get_pjnz_csv_data(pjnz_path, extension)
 }
@@ -15,7 +15,7 @@ get_pjnz_csv_data(pjnz_path, extension)
 The data from file read as a csv.
 }
 \description{
-Get csv data from file containing within PJNZ
+Get csv data from file contained within PJNZ
 }
 \examples{
 pjnz <- system.file("testdata", "Botswana2018.PJNZ", package = "specio")

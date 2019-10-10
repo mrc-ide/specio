@@ -1,3 +1,7 @@
+## 0.1.3
+
+Fix windows BOM bug using manual column name fix
+
 ## 0.1.2
 
 Fix bug reading Spectrum 2019 files

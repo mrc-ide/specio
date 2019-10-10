@@ -74,7 +74,7 @@ get_pjn_data <- function(pjnz_path) {
   get_pjnz_csv_data(pjnz_path, "PJN")
 }
 
-#' Get csv data from file containing within PJNZ
+#' Get csv data from file contained within PJNZ
 #'
 #' @param pjnz_path Path to PJNZ zip file.
 #' @param extension The file extension to look for.
@@ -89,9 +89,11 @@ get_pjn_data <- function(pjnz_path) {
 #' specio:::get_pjnz_csv_data(pjnz, "PJN")
 get_pjnz_csv_data <- function(pjnz_path, extension) {
   file <- get_filename_from_extension(extension, pjnz_path)
-  ## Use UTF-8-BOM encoding to remove the Byte order mark at the start of the
-  ## file if it is present. This is ignored by default on Linux but included
-  ## when reading the file on windows.
-  csv <- utils::read.csv(unz(pjnz_path, file), stringsAsFactors = FALSE,
-                         encoding = "UTF-8-BOM")
+  csv <- utils::read.csv(unz(pjnz_path, file), stringsAsFactors = FALSE)
+  ## Set column name of first column manually to remove any possible byte order
+  ## mark added when reading the file on windows. We should be able to work
+  ## around this by passing encoding = "UTF-8-BOM" or fileEncoding = "UTF-8-BOM"
+  ## as arg to read.csv but this isn't working reliably.
+  colnames(csv)[[1]] <- "Tag"
+  csv
 }
