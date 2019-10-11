@@ -17,6 +17,7 @@ Imports:
 Remotes:
     mrc-ide/beers
 Suggests: 
+    mockery,
     testthat,
     knitr,
     rmarkdown

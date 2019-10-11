@@ -89,11 +89,19 @@ get_pjn_data <- function(pjnz_path) {
 #' specio:::get_pjnz_csv_data(pjnz, "PJN")
 get_pjnz_csv_data <- function(pjnz_path, extension) {
   file <- get_filename_from_extension(extension, pjnz_path)
-  csv <- utils::read.csv(unz(pjnz_path, file), stringsAsFactors = FALSE)
-  ## Set column name of first column manually to remove any possible byte order
-  ## mark added when reading the file on windows. We should be able to work
-  ## around this by passing encoding = "UTF-8-BOM" or fileEncoding = "UTF-8-BOM"
-  ## as arg to read.csv but this isn't working reliably.
-  colnames(csv)[[1]] <- "Tag"
+  csv <- read_csv(unz(pjnz_path, file))
+  ## If the first column name has preceeding bytes then manually strip them.
+  ## This works around reading files on windows with a preceeding BOM. We
+  ## should be able to work around this by passing encoding = "UTF-8-BOM" or
+  ## fileEncoding = "UTF-8-BOM" as arg to read.csv but this isn't working
+  ## reliably.
+  bytes <- charToRaw(colnames(csv)[[1]])
+  if (length(bytes) > 3 && identical(tail(bytes, 3), charToRaw("Tag"))) {
+    colnames(csv)[[1]] <- "Tag"
+  }
   csv
+}
+
+read_csv <- function(file) {
+  utils::read.csv(file, stringsAsFactors = FALSE)
 }

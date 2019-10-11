@@ -39,3 +39,20 @@ test_that("DP and PJN data can be read", {
   expect_length(names(pjn_data), 59)
 })
 
+test_that("reading csv data correctly strips any preceeding BOM", {
+  pjnz <- system.file("testdata", "Botswana2018.PJNZ", package = "specio")
+  data <- get_pjnz_csv_data(pjnz, "DP")
+  ## Not a problem on Linux machines
+  expect_equal(colnames(data)[[1]], "Tag")
+
+  ## Mock windows response
+  file <- get_filename_from_extension("DP", pjnz)
+  csv <- read_csv(unz(pjnz, file))
+  colnames(csv)[[1]] <- paste0("ï..", colnames(csv)[[1]])
+  mock_read_csv <- mockery::mock(csv)
+  with_mock("specio:::read_csv" = mock_read_csv, {
+    data <- get_pjnz_csv_data(pjnz, "DP")
+  })
+  expect_equal(colnames(data)[[1]], "Tag")
+})
+
