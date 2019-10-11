@@ -1,6 +1,6 @@
 Package: specio
 Title: Read Spectrum Files
-Version: 0.1.2
+Version: 0.1.3
 Authors@R: 
     person(given = "Robert",
            family = "Ashton",
@@ -17,6 +17,7 @@ Imports:
 Remotes:
     mrc-ide/beers
 Suggests: 
+    mockery,
     testthat,
     knitr,
     rmarkdown
