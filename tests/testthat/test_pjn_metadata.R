@@ -20,3 +20,14 @@ test_that("projection metadata can be read from PJN file for Mozambique 2018", {
   expect_equal(pjn_data$projection_name,
                "11_MZ_Maputo Cidade_v5_63_updated census_22_01_2018")
 })
+
+test_that("spectrum region code can be read", {
+  pjnz_path <- system.file("testdata", "Botswana2017.PJNZ", package = "specio")
+  spectrum_region_code <- read_spectrum_region_code(pjnz_path)
+  ## Null for Botswana2017 as not a subnational PJNZ
+  expect_equal(spectrum_region_code, NULL)
+
+  pjnz_path <- file.path("pjnz_testdata", "Mozambique_Maputo_Cidade2018.PJNZ")
+  spectrum_region_code <- read_spectrum_region_code(pjnz_path)
+  expect_equal(spectrum_region_code, "SOUTH_Maputo Cidade")
+})

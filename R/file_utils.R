@@ -96,7 +96,7 @@ get_pjnz_csv_data <- function(pjnz_path, extension) {
   ## fileEncoding = "UTF-8-BOM" as arg to read.csv but this isn't working
   ## reliably.
   bytes <- charToRaw(colnames(csv)[[1]])
-  if (length(bytes) > 3 && identical(tail(bytes, 3), charToRaw("Tag"))) {
+  if (length(bytes) > 3 && identical(utils::tail(bytes, 3), charToRaw("Tag"))) {
     colnames(csv)[[1]] <- "Tag"
   }
   csv
