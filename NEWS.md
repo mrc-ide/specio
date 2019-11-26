@@ -1,3 +1,7 @@
+## 0.1.4
+
+Add function to extract spectrum region code from PJNZ file
+
 ## 0.1.3
 
 Fix windows BOM bug using manual column name fix
