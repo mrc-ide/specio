@@ -67,10 +67,6 @@ get_pjn_region_code <- function(pjn) {
   region_code <- pjn[which(
     pjn[, "Tag"] == "<Projection Parameters - Subnational Region Name2>") + 3,
     "Data"]
-  if (region_code == "") {
-    return(NULL)
-  } else {
-    return(as.integer(region_code))
-  }
+  as.integer(region_code)
 }
 
