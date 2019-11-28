@@ -27,11 +27,11 @@ test_that("spectrum region code can be read", {
   expect_equal(metadata$country, "Botswana")
   expect_equal(metadata$iso3, 72)
   ## Null for Botswana2017 as not a subnational PJNZ
-  expect_equal(metadata$spectrum_region_code, 0)
+  expect_equal(metadata$region_code, 0)
 
   pjnz_path <- file.path("pjnz_testdata", "Mozambique_Maputo_Cidade2018.PJNZ")
   metadata <- read_pjn_metadata(pjnz_path)
   expect_equal(metadata$country, "Mozambique")
   expect_equal(metadata$iso3, 508)
-  expect_equal(metadata$spectrum_region_code, 1)
+  expect_equal(metadata$region_code, 1)
 })

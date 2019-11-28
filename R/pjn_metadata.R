@@ -25,7 +25,7 @@ get_pjn_metadata <- function(pjn_data) {
 read_pjn_metadata <- function(pjnz) {
   pjn_data <- get_pjn_data(pjnz)
   metadata <- get_pjn_country(pjn_data)
-  metadata$spectrum_region_code <- get_pjn_region_code(pjn_data)
+  metadata$region_code <- get_pjn_region_code(pjn_data)
   metadata
 }
 
