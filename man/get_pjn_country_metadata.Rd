@@ -15,4 +15,3 @@ The country metadata.
 \description{
 Get country name and code from PJNZ
 }
-\keyword{internal}

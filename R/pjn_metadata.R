@@ -21,7 +21,7 @@ get_pjn_metadata <- function(pjn_data) {
 #' @param pjnz Path to PJNZ file.
 #' @return The country metadata.
 #'
-#' @keywords internal
+#' @export
 get_pjn_country_metadata <- function(pjnz) {
   pjn_data <- get_pjn_data(pjnz)
   get_pjn_country(pjn_data)
