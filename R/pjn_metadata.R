@@ -16,15 +16,17 @@ get_pjn_metadata <- function(pjn_data) {
   properties
 }
 
-#' Get country name and code from PJNZ
+#' Get country name, iso3 code and spectrum region code from PJNZ
 #'
 #' @param pjnz Path to PJNZ file.
-#' @return The country metadata.
+#' @return The country and region code metadata
 #'
 #' @export
-get_pjn_country_metadata <- function(pjnz) {
+read_pjn_metadata <- function(pjnz) {
   pjn_data <- get_pjn_data(pjnz)
-  get_pjn_country(pjn_data)
+  metadata <- get_pjn_country(pjn_data)
+  metadata$spectrum_region_code <- get_pjn_region_code(pjn_data)
+  metadata
 }
 
 #' Get country name and code from parsed PJN
@@ -58,19 +60,17 @@ get_pjn_region <- function(pjn) {
   }
 }
 
-#' Read spectrum region code from PJN file in PJNZ
+#' Get subnational region code from parsed PJN
 #'
-#'
-#' @param pjnz_path Path to PJNZ file to extract the data from.
-#'
-#' @return Spectrum region code
-#' @export
-#'
-#' @examples
-#' pjnz_path <- system.file("testdata", "Botswana2017.PJNZ", package = "specio")
-#' spectrum_region_code <- read_spectrum_region_code(pjnz_path)
-#'
-read_spectrum_region_code <- function(pjnz_path) {
-  pjn_data <- get_pjn_data(pjnz_path)
-  get_pjn_region(pjn_data)
+#' @keywords internal
+get_pjn_region_code <- function(pjn) {
+  region_code <- pjn[which(
+    pjn[, "Tag"] == "<Projection Parameters - Subnational Region Name2>") + 3,
+    "Data"]
+  if (region_code == "") {
+    return(NULL)
+  } else {
+    return(as.integer(region_code))
+  }
 }
+
