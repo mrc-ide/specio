@@ -16,6 +16,19 @@ get_pjn_metadata <- function(pjn_data) {
   properties
 }
 
+#' Get country name, iso3 code and spectrum region code from PJNZ
+#'
+#' @param pjnz Path to PJNZ file.
+#' @return The country and region code metadata
+#'
+#' @export
+read_pjn_metadata <- function(pjnz) {
+  pjn_data <- get_pjn_data(pjnz)
+  metadata <- get_pjn_country(pjn_data)
+  metadata$region_code <- get_pjn_region_code(pjn_data)
+  metadata
+}
+
 #' Get country name and code from parsed PJN
 #'
 #' @keywords internal
@@ -46,3 +59,14 @@ get_pjn_region <- function(pjn) {
     return(region)
   }
 }
+
+#' Get subnational region code from parsed PJN
+#'
+#' @keywords internal
+get_pjn_region_code <- function(pjn) {
+  region_code <- pjn[which(
+    pjn[, "Tag"] == "<Projection Parameters - Subnational Region Name2>") + 3,
+    "Data"]
+  as.integer(region_code)
+}
+

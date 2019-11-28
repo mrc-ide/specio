@@ -1,3 +1,7 @@
+## 0.1.4
+
+Add function to extract metdata from PJNZ
+
 ## 0.1.3
 
 Fix windows BOM bug using manual column name fix
@@ -12,4 +16,4 @@ Fix bug on windows where read.csv including byte order mark in column names of D
 
 ## 0.1.0
 
-Add extract_population and extract_hiv_population methods
+Add extract_population and extract_hiv_population methods 
