@@ -20,3 +20,10 @@ test_that("projection metadata can be read from PJN file for Mozambique 2018", {
   expect_equal(pjn_data$projection_name,
                "11_MZ_Maputo Cidade_v5_63_updated census_22_01_2018")
 })
+
+test_that("can get country metadata from PJNZ", {
+  country <- get_pjn_country_metadata(
+    file.path("pjnz_testdata/Botswana2019.PJNZ"))
+  expect_equal(country$country, "Botswana")
+  expect_equal(country$iso3, 72)
+})

@@ -16,6 +16,17 @@ get_pjn_metadata <- function(pjn_data) {
   properties
 }
 
+#' Get country name and code from PJNZ
+#'
+#' @param pjnz Path to PJNZ file.
+#' @return The country metadata.
+#'
+#' @keywords internal
+get_pjn_country_metadata <- function(pjnz) {
+  pjn_data <- get_pjn_data(pjnz)
+  get_pjn_country(pjn_data)
+}
+
 #' Get country name and code from parsed PJN
 #'
 #' @keywords internal
