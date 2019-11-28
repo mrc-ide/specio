@@ -1,6 +1,6 @@
 ## 0.1.4
 
-Add function to extract country metdata from PJNZ
+Add function to extract metdata from PJNZ
 
 ## 0.1.3
 

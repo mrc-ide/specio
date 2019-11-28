@@ -27,3 +27,14 @@ test_that("can get country metadata from PJNZ", {
   expect_equal(country$country, "Botswana")
   expect_equal(country$iso3, 72)
 })
+
+test_that("spectrum region code can be read", {
+  pjnz_path <- system.file("testdata", "Botswana2017.PJNZ", package = "specio")
+  spectrum_region_code <- read_spectrum_region_code(pjnz_path)
+  ## Null for Botswana2017 as not a subnational PJNZ
+  expect_equal(spectrum_region_code, NULL)
+
+  pjnz_path <- file.path("pjnz_testdata", "Mozambique_Maputo_Cidade2018.PJNZ")
+  spectrum_region_code <- read_spectrum_region_code(pjnz_path)
+  expect_equal(spectrum_region_code, "SOUTH_Maputo Cidade")
+})

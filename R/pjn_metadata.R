@@ -57,3 +57,20 @@ get_pjn_region <- function(pjn) {
     return(region)
   }
 }
+
+#' Read spectrum region code from PJN file in PJNZ
+#'
+#'
+#' @param pjnz_path Path to PJNZ file to extract the data from.
+#'
+#' @return Spectrum region code
+#' @export
+#'
+#' @examples
+#' pjnz_path <- system.file("testdata", "Botswana2017.PJNZ", package = "specio")
+#' spectrum_region_code <- read_spectrum_region_code(pjnz_path)
+#'
+read_spectrum_region_code <- function(pjnz_path) {
+  pjn_data <- get_pjn_data(pjnz_path)
+  get_pjn_region(pjn_data)
+}
